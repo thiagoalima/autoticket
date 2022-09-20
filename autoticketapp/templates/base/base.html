@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width, viewport-fit=cover"/>
+
+      <title>{% block title %}Home{% endblock %} | Autoticket</title>
+
+      {% load bootstrap5 %}
+
+      {% bootstrap_css %}
+
+      {% bootstrap_javascript %}
+
+      {% bootstrap_messages %}
+</head>
+<body>
+    <div class="container-fluid px-0">
+        <main class="layout">
+    {% include 'base/nav.html' %}
+
+
+    {% block content %}
+
+    {% endblock content %}
+        </main>
+    </div>
+</body>
+</html>
