@@ -17,15 +17,13 @@
       {% bootstrap_messages %}
 </head>
 <body>
+    {% block layout %}
     <div class="container-fluid px-0">
-        <main class="layout">
-    {% include 'base/nav.html' %}
+        {% include 'base/nav.html' %}
 
-
-    {% block content %}
-
-    {% endblock content %}
-        </main>
+        {% block content %}
+        {% endblock content %}
     </div>
+    {% endblock layout %}
 </body>
 </html>
