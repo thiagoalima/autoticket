@@ -47,8 +47,8 @@ class AdminUser(User):
 
 class Token(models.Model):
     """
-    An API token used for user authentication. This extends the stock model to allow each user to have multiple tokens.
-    It also supports setting an expiration time and toggling write ability.
+    Um token de API usado para autenticação do usuário. Isso estende o modelo de estoque para permitir que cada usuário tenha vários tokens.
+     Ele também suporta a configuração de um tempo de expiração e a alternância da capacidade de gravação.
     """
     user = models.ForeignKey(
         to=User,
@@ -69,7 +69,7 @@ class Token(models.Model):
     )
     write_enabled = models.BooleanField(
         default=True,
-        help_text='Permit create/update/delete operations using this key'
+        help_text='Permite criar/atualizar/deletar operações com essa chave'
     )
     description = models.CharField(
         max_length=200,
@@ -80,7 +80,7 @@ class Token(models.Model):
         pass
 
     def __str__(self):
-        # Only display the last 24 bits of the token to avoid accidental exposure.
+        # Exiba apenas os últimos 24 bits do token para evitar exposição acidental.
         return f"{self.key[-6:]} ({self.user})"
 
     def save(self, *args, **kwargs):
@@ -90,7 +90,7 @@ class Token(models.Model):
 
     @staticmethod
     def generate_key():
-        # Generate a random 160-bit key expressed in hexadecimal.
+        # Gera uma chave aleatória de 160 bits expressa em hexadecimal.
         return binascii.hexlify(os.urandom(20)).decode()
 
     @property
@@ -106,9 +106,9 @@ class Token(models.Model):
 
 class ObjectPermission(models.Model):
     """
-    A mapping of view, add, change, and/or delete permission for users and/or groups to an arbitrary set of objects
-    identified by ORM query parameters.
-    """
+     Um mapeamento de permissão de visualização, adição, alteração e/ou exclusão de usuários e/ou grupos para um conjunto arbitrário de objetos
+     identificado por parâmetros de consulta ORM.
+     """
     name = models.CharField(
         max_length=100
     )
@@ -136,12 +136,12 @@ class ObjectPermission(models.Model):
     )
     actions = ArrayField(
         base_field=models.CharField(max_length=30),
-        help_text="The list of actions granted by this permission"
+        help_text="A lista de ações concedidas por esta permissão"
     )
     constraints = models.JSONField(
         blank=True,
         null=True,
-        help_text="Queryset filter matching the applicable objects of the selected type(s)"
+        help_text="Filtro do conjunto de consultas que corresponde aos objetos aplicáveis do(s) tipo(s) selecionado(s)"
     )
 
     objects = RestrictedQuerySet.as_manager()
@@ -155,7 +155,7 @@ class ObjectPermission(models.Model):
 
     def list_constraints(self):
         """
-        Return all constraint sets as a list (even if only a single set is defined).
+        Retorne todos os conjuntos de restrições como uma lista (mesmo que apenas um único conjunto seja definido).
         """
         if type(self.constraints) is not list:
             return [self.constraints]

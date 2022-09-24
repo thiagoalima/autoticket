@@ -29,7 +29,7 @@ class LoginView(View):
         form = AuthenticationForm(request)
 
         if request.user.is_authenticated:
-            logger = logging.getLogger('netbox.auth.login')
+            logger = logging.getLogger('users.auth.login')
             return self.redirect_to_next(request, logger)
 
 
@@ -40,14 +40,15 @@ class LoginView(View):
     def post(self, request):
 
         form = AuthenticationForm(request, data=request.POST)
+        logger = logging.getLogger('users.auth.login')
 
         if form.is_valid():
 
             # Authenticate user
             auth_login(request, form.get_user())
-            messages.info(request, f"Logged in as {request.user}.")
+            messages.info(request, f"Logado como {request.user}.")
 
-            return self.redirect_to_next(request)
+            return self.redirect_to_next(request,logger)
 
         else:
             messages.info(request,"Login ou Senha invalido")
@@ -61,19 +62,16 @@ class LoginView(View):
         redirect_url = data.get('next', settings.LOGIN_REDIRECT_URL)
 
         if redirect_url and url_has_allowed_host_and_scheme(redirect_url, allowed_hosts=None):
-            logger.debug(f"Redirecting user to {redirect_url}")
+            logger.debug(f"Redirecionando o usuario para {redirect_url}")
         else:
             if redirect_url:
-                logger.warning(f"Ignoring unsafe 'next' URL passed to login form: {redirect_url}")
+                logger.warning(f"Ignorando 'next' URL passado para o form login: {redirect_url}")
             redirect_url = reverse('home')
 
         return HttpResponseRedirect(redirect_url)
 
 
 class LogoutView(View):
-    """
-    Deauthenticate a web user.
-    """
 
     def get(self, request):
 
@@ -81,7 +79,7 @@ class LogoutView(View):
         username = request.user
         auth_logout(request)
   
-        messages.info(request, "You have logged out.")
+        messages.info(request, "Você foi deslogado.")
 
         # Delete session key cookie (if set) upon logout
         response = HttpResponseRedirect(reverse('home'))
@@ -110,7 +108,7 @@ class ChangePasswordView(LoginRequiredMixin, View):
         if form.is_valid():
             form.save()
             update_session_auth_hash(request, form.user)
-            messages.success(request, "Your password has been changed successfully.")
+            messages.success(request, "Seu password foi alterado com sucesso.")
             return redirect('home')
 
         return render(request, self.template_name, {
@@ -165,7 +163,7 @@ class TokenEditView(LoginRequiredMixin, View):
             token.user = request.user
             token.save()
 
-            msg = f"Modified token {token}" if pk else f"Created token {token}"
+            msg = f"Modified token {token}" if pk else f"Token criado {token}"
             messages.success(request, msg)
 
             if '_addanother' in request.POST:
@@ -202,7 +200,7 @@ class TokenDeleteView(LoginRequiredMixin, View):
         form = ConfirmationForm(request.POST)
         if form.is_valid():
             token.delete()
-            messages.success(request, "Token deleted")
+            messages.success(request, "Token deletado")
             return redirect('user:token_list')
 
         return render(request, 'generic/object_delete.html', {

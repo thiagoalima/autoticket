@@ -37,7 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Extract the password from validated data and set it separately to ensure proper hash generation.
+       Extraia a senha dos dados validados e defina-a separadamente para garantir a geração de hash adequada.
         """
         password = validated_data.pop('password')
         user = super().create(validated_data)

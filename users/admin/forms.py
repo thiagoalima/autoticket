@@ -45,7 +45,7 @@ class GroupAdminForm(forms.ModelForm):
 class TokenAdminForm(forms.ModelForm):
     key = forms.CharField(
         required=False,
-        help_text="If no key is provided, one will be generated automatically."
+        help_text="Se nenhuma chave for fornecida, uma será gerada automaticamente."
     )
 
     class Meta:
@@ -70,13 +70,13 @@ class ObjectPermissionForm(forms.ModelForm):
         model = ObjectPermission
         exclude = []
         help_texts = {
-            'actions': 'Actions granted in addition to those listed above',
-            'constraints': 'JSON expression of a queryset filter that will return only permitted objects. Leave null '
-                           'to match all objects of this type. A list of multiple objects will result in a logical OR '
-                           'operation.'
+            'actions': 'Ações concedidas além das listadas acima',
+            'constraints': 'Expressão JSON de um filtro de conjunto de consultas que retornará apenas objetos permitidos. Deixar nulo '
+                            'para corresponder a todos os objetos deste tipo. Uma lista de vários objetos resultará em um OR lógico '
+                            'Operação.'
         }
         labels = {
-            'actions': 'Additional actions'
+            'actions': 'Ações adicionais'
         }
         widgets = {
             'constraints': forms.Textarea(attrs={'class': 'vLargeTextField'})
@@ -85,14 +85,14 @@ class ObjectPermissionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Make the actions field optional since the admin form uses it only for non-CRUD actions
+        # Torne o campo de ações opcional, pois o formulário de administração o usa apenas para ações não CRUD
         self.fields['actions'].required = False
 
-        # Order group and user fields
+        # Order group e campos de usuario
         self.fields['groups'].queryset = self.fields['groups'].queryset.order_by('name')
         self.fields['users'].queryset = self.fields['users'].queryset.order_by('username')
 
-        # Check the appropriate checkboxes when editing an existing ObjectPermission
+        # Marque as caixas de seleção apropriadas ao editar um ObjectPermission existente
         if self.instance.pk:
             for action in ['view', 'add', 'change', 'delete']:
                 if action in self.instance.actions:
@@ -105,21 +105,21 @@ class ObjectPermissionForm(forms.ModelForm):
         object_types = self.cleaned_data.get('object_types')
         constraints = self.cleaned_data.get('constraints')
 
-        # Append any of the selected CRUD checkboxes to the actions list
+        # Anexe qualquer uma das caixas de seleção CRUD selecionadas à lista de ações
         if not self.cleaned_data.get('actions'):
             self.cleaned_data['actions'] = list()
         for action in ['view', 'add', 'change', 'delete']:
             if self.cleaned_data[f'can_{action}'] and action not in self.cleaned_data['actions']:
                 self.cleaned_data['actions'].append(action)
 
-        # At least one action must be specified
+        # Pelo menos uma ação deve ser especificada
         if not self.cleaned_data['actions']:
             raise ValidationError("At least one action must be selected.")
 
-        # Validate the specified model constraints by attempting to execute a query. We don't care whether the query
-        # returns anything; we just want to make sure the specified constraints are valid.
+        # Valide as restrições de modelo especificadas tentando executar uma consulta. Não nos importamos se a consulta
+         # retorna qualquer coisa; queremos apenas garantir que as restrições especificadas sejam válidas.
         if object_types and constraints:
-            # Normalize the constraints to a list of dicts
+            # Normaliza as restrições para uma lista de dicts
             if type(constraints) is not list:
                 constraints = [constraints]
             for ct in object_types:
@@ -128,5 +128,5 @@ class ObjectPermissionForm(forms.ModelForm):
                     model.objects.filter(*[Q(**c) for c in constraints]).exists()
                 except FieldError as e:
                     raise ValidationError({
-                        'constraints': f'Invalid filter for {model}: {e}'
+                        'constraints': f'Filtro invalido para {model}: {e}'
                     })

@@ -50,7 +50,7 @@ class TokenViewSet(ModelViewSet):
 
     def get_queryset(self):
         """
-        Limit the non-superusers to their own Tokens.
+        Limite os não superusuários aos seus próprios Tokens.
         """
         queryset = super().get_queryset()
         # Workaround for schema generation (drf_yasg)
@@ -65,7 +65,7 @@ class TokenViewSet(ModelViewSet):
 
 class TokenProvisionView(APIView):
     """
-    Non-authenticated REST API endpoint via which a user may create a Token.
+    Endpoint da API REST não autenticado por meio do qual um usuário pode criar um Token.
     """
     permission_classes = []
 
@@ -77,10 +77,10 @@ class TokenProvisionView(APIView):
         username = serializer.data.get('username')
         password = serializer.data.get('password')
         if not username or not password:
-            raise AuthenticationFailed("Username and password must be provided to provision a token.")
+            raise AuthenticationFailed("O nome de usuário e a senha devem ser fornecidos para provisionar um token.")
         user = authenticate(request=request, username=username, password=password)
         if user is None:
-            raise AuthenticationFailed("Invalid username/password")
+            raise AuthenticationFailed("username/password Invalido")
 
         # Create a new Token for the User
         token = Token(user=user)

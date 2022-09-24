@@ -18,19 +18,9 @@
           </a>
         {% endif %}
       </li>
-      <li>
-        <a class="dropdown-item" href="{% url 'user:profile' %}">
-          <i class="mdi mdi-account"></i> Profile
-        </a>
-      </li>
-      <li>
-        <a class="dropdown-item" href="{% url 'user:preferences' %}">
-          <i class="mdi mdi-wrench"></i> Preferences
-        </a>
-      </li>
       <li><hr class="dropdown-divider" /></li>
       <li>
-        <a class="dropdown-item" href="{% url 'logout' %}">
+        <a class="dropdown-item" href="{% url 'user:logout' %}">
           <i class="mdi mdi-logout-variant"></i> Log Out
         </a>
       </li>
@@ -38,7 +28,7 @@
   </div>
 {% else %}
   <div class="btn-group">
-    <a class="btn btn-primary ws-nowrap" type="button" href="{% url 'user:login' %}">
+    <a class="btn btn-primary ws-nowrap" type="button" href="{% url 'user:login' %}?next={{ request.path }}">
       <i class="mdi mdi-login-variant"></i> Log In
     </a>
     <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">

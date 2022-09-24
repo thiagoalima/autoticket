@@ -7,7 +7,7 @@ from .models import Token
 class TokenForm(LoginRequiredMixin, forms.ModelForm):
     key = forms.CharField(
         required=False,
-        help_text="If no key is provided, one will be generated automatically."
+        help_text="Se nenhuma chave for fornecida, uma será gerada automaticamente."
     )
 
     class Meta:
@@ -18,13 +18,13 @@ class TokenForm(LoginRequiredMixin, forms.ModelForm):
 
 class ReturnURLForm(forms.Form):
     """
-    Provides a hidden return URL field to control where the user is directed after the form is submitted.
+    Fornece um campo de URL de retorno oculto para controlar para onde o usuário é direcionado após o envio do formulário.
     """
     return_url = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class ConfirmationForm(ReturnURLForm):
     """
-    A generic confirmation form. The form is not valid unless the confirm field is checked.
+   Um formulário de confirmação genérico. O formulário não é válido a menos que o campo de confirmação esteja marcado.
     """
     confirm = forms.BooleanField(required=True, widget=forms.HiddenInput(), initial=True)
