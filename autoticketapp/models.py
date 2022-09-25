@@ -22,7 +22,7 @@ class Ticket (models.Model):
 
     titulo = models.CharField(
         max_length=100,
-        verbose_name='Name',
+        verbose_name='Titulo',
     )
 
     descricao = models.TextField(
