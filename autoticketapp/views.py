@@ -1,40 +1,44 @@
 from django.views.generic import View
-from django.views.generic.edit import CreateView,UpdateView, DeleteView
-from django_tables2 import SingleTableView
-from django.shortcuts import  render
+from django.shortcuts import  render, redirect
+from django.urls import reverse
 
+from users.utilities.view import TableView, CreateView, UpdateView, DeleteView, DetailView
 from .models import Ticket
 from .tables import TicketTable
-from .forms import TicketForm
 
 
 class HomeView(View):
     template_name = 'base/home.html'
 
     def get(self, request):
-        #if settings.LOGIN_REQUIRED and not request.user.is_authenticated:
-        #    return redirect("login")
+        if  not request.user.is_authenticated:
+            url = "{}?next={}".format(reverse('user:login'), request.path )
+            return redirect(url)
         
         return render(request, self.template_name, {})
 
-class TicketListView(SingleTableView):
+class TicketDetailView (DetailView):
+    model = Ticket
+
+class TicketListView(TableView):
+    permission_required = 'autoticketapp.view_ticket'
     model = Ticket
     table_class = TicketTable
     template_name = 'autoticketapp/ticket_list.html'
 
 class TicketCreateView(CreateView):
+    permission_required = 'autoticketapp.add_ticket'
     model = Ticket
     fields = ["numero","titulo","descricao","prioridade"]
     template_name = "autoticketapp/ticket_form.html"
-    success_url = "/autoticket/ticket/"
 
 class TicketUpdateView(UpdateView):
+    permission_required = 'autoticket.change_ticket'
     model = Ticket
     fields = ["numero","titulo","descricao","prioridade"]
     template_name = "autoticketapp/ticket_form.html"
-    success_url = "/autoticket/ticket/"
 
 class TicketDeleteView(DeleteView):
+    permission_required = 'autoticket.delete_ticket'
     model = Ticket
-    success_url = "/autoticket/ticket/"
     template_name = "autoticketapp/confirm_delete.html"

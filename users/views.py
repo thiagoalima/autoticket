@@ -9,7 +9,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.decorators import method_decorator
+from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import View
+
 
 from .forms import ConfirmationForm, TokenForm
 
@@ -21,9 +24,14 @@ from .models import Token
 #
 
 class LoginView(View):
-
+    """
+    Perform user authentication via the web UI.
+    """
     template_name = 'users/login.html'
 
+    @method_decorator(sensitive_post_parameters('password'))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request):
         form = AuthenticationForm(request)
@@ -32,26 +40,26 @@ class LoginView(View):
             logger = logging.getLogger('users.auth.login')
             return self.redirect_to_next(request, logger)
 
-
         return render(request, self.template_name, {
             'form': form,
         })
 
     def post(self, request):
-
-        form = AuthenticationForm(request, data=request.POST)
         logger = logging.getLogger('users.auth.login')
+        form = AuthenticationForm(request, data=request.POST)
 
         if form.is_valid():
+            logger.debug("Login form validation was successful")
 
             # Authenticate user
             auth_login(request, form.get_user())
+            logger.info(f"Usuario {request.user} autenticado com sucesso")
             messages.info(request, f"Logado como {request.user}.")
 
-            return self.redirect_to_next(request,logger)
+            return self.redirect_to_next(request, logger)
 
         else:
-            messages.info(request,"Login ou Senha invalido")
+            logger.debug("Login form validation failed")
 
         return render(request, self.template_name, {
             'form': form,
@@ -82,7 +90,7 @@ class LogoutView(View):
         messages.info(request, "Você foi deslogado.")
 
         # Delete session key cookie (if set) upon logout
-        response = HttpResponseRedirect(reverse('home'))
+        response = HttpResponseRedirect(reverse('autoticket:home'))
         response.delete_cookie('session_key')
 
         return response

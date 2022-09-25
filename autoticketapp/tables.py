@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django_tables2.utils import Accessor
 from django_tables2.columns import TemplateColumn
 
 from .models import Ticket
@@ -6,9 +7,14 @@ from .models import Ticket
 class BaseTable(tables.Table):
     template_name = "django_tables2/bootstrap.html"
 
-class TicketTable(tables.Table): 
+class TicketTable(tables.Table):
 
-    controls = TemplateColumn(template_name='autoticketapp/ticket_controls.html')
+    numero = tables.LinkColumn(
+        viewname='autoticket:ticket_detail',
+        args=[Accessor('id')]
+    )
+
+    controls = TemplateColumn(verbose_name=' ', template_name='autoticketapp/ticket_controls.html')
 
     class Meta:
         model = Ticket

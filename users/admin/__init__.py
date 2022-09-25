@@ -44,7 +44,10 @@ class UserAdmin(UserAdmin_):
     filter_horizontal = ('groups',)
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'groups__name')
 
-
+    def get_inlines(self, request, obj):
+        if obj is not None:
+            return (inlines.UserObjectPermissionInline, inlines.UserConfigInline)
+        return ()
 #
 # REST API tokens
 #

@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
 
+from ..models import UserConfig
+
 __all__ = (
     'GroupObjectPermissionInline',
     'UserConfigInline',
@@ -39,3 +41,8 @@ class GroupObjectPermissionInline(ObjectPermissionInline):
 class UserObjectPermissionInline(ObjectPermissionInline):
     model = User.object_permissions.through
 
+class UserConfigInline(admin.TabularInline):
+    model = UserConfig
+    readonly_fields = ('data',)
+    can_delete = False
+    verbose_name = 'Preferences'

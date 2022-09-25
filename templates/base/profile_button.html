@@ -6,12 +6,6 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-end">
       <li>
-        <button type="button" class="dropdown-item color-mode-toggle">
-          <i class="color-mode-icon mdi mdi-lightbulb"></i>
-          <span class="color-mode-text">Dark Mode</span>
-        </button>
-      </li>
-      <li>
         {% if request.user.is_staff %}
           <a class="dropdown-item" href="{% url 'admin:index' %}">
             <i class="mdi mdi-cog"></i> Admin

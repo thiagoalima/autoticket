@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
+from os import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,9 +42,13 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'django_tables2',
     'bootstrap5',
+    'crispy_forms',
+    'crispy_bootstrap5',
     'autoticketapp',
     'users',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,6 +77,15 @@ TEMPLATES = [
         },
     },
 ]
+
+# Set up authentication backends
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.ObjectPermissionBackend',
+]
+
+# Exempt certain models from the enforcement of view permissions. Models listed here will be viewable by all users and
+# by anonymous users. List models in the form `<app>.<model>`. Add '*' to this list to exempt all models.
+EXEMPT_VIEW_PERMISSIONS = list(filter(None, environ.get('EXEMPT_VIEW_PERMISSIONS', '').split(' ')))
 
 WSGI_APPLICATION = 'autoticket.wsgi.application'
 
