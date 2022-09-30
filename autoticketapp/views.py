@@ -3,11 +3,21 @@ from django.shortcuts import  render, redirect
 from django.urls import reverse
 
 from users.utilities.view import TableView, CreateView, UpdateView, DeleteView, DetailView
-from .models import Ticket
-from .tables import TicketTable
-from .models import Team
-from .tables import TeamTable
-from .models import Template
+from .models import (
+    Ticket,
+    Team,
+    Group,
+    Service,
+    Template,
+)
+from .tables import (
+    TicketTable,
+    TeamTable,
+    GroupTable,
+    ServiceTable,
+    TemplateTable,
+)
+
 class HomeView(View):
     template_name = 'base/home.html'
 
@@ -81,6 +91,76 @@ class TeamDeleteView(DeleteView):
     model = Team
     template_name = "autoticketapp/confirm_delete.html"
     success_url = TEAM_URL
+    
+"""
+    Classes refering to the Group views
+"""  
+
+GROUP_URL = '/autoticket/group'
+
+class GroupDetailView (DetailView):
+    model = Group
+
+class GroupListView(TableView):
+    permission_required = 'autoticketapp.view_group'
+    model = Group
+    table_class = GroupTable
+    template_name = 'autoticketapp/group_list.html'
+
+class GroupCreateView(CreateView):
+    permission_required = 'autoticket.add_group'
+    model = Group
+    fields = ["titulo", "equipe"]
+    template_name = "autoticketapp/group_form.html"
+    success_url = GROUP_URL
+
+class GroupUpdateView(UpdateView):
+    permission_required = 'autoticket.change_group'
+    model = Group
+    fields = ["titulo", "equipe"]
+    template_name = "autoticketapp/group_form.html"
+    success_url = GROUP_URL
+
+class GroupDeleteView(DeleteView):
+    permission_required = 'autoticket.delete_group'
+    model = Group
+    template_name = "autoticketapp/confirm_delete.html"
+    success_url = GROUP_URL
+   
+"""
+    Classes refering to the Group views
+"""  
+SERVICE_URL = '/autoticket/service'
+
+class ServiceDetailView (DetailView):
+    model = Service
+
+class ServiceListView(TableView):
+    permission_required = 'autoticketapp.view_service'
+    model = Service
+    table_class = ServiceTable
+    template_name = 'autoticketapp/service_list.html'
+
+class ServiceCreateView(CreateView):
+    permission_required = 'autoticket.add_service'
+    model = Service
+    fields = ["nome", "status"]
+    template_name = "autoticketapp/service_form.html"
+    success_url = SERVICE_URL
+
+class ServiceUpdateView(UpdateView):
+    permission_required = 'autoticket.change_service'
+    model = Service
+    fields = ["nome", "status"]
+    template_name = "autoticketapp/service_form.html"
+    success_url = SERVICE_URL
+
+class ServiceDeleteView(DeleteView):
+    permission_required = 'autoticket.delete_service'
+    model = Service
+    template_name = "autoticketapp/confirm_delete.html"
+    success_url = SERVICE_URL
+   
    
 """
     Classes refering to the Template views
@@ -94,20 +174,20 @@ class TemplateDetailView (DetailView):
 class TemplateListView(TableView):
     permission_required = 'autoticket.view_template'
     model = Template
-    # table_class = TemplateTable
+    table_class = TemplateTable
     template_name = 'autoticketapp/template_list.html'
 
 class TemplateCreateView(CreateView):
     permission_required = 'autoticketapp.add_template'
     model = Template
-    fields = ["nome", "codigo"]
+    fields = ["titulo", "codigo"]
     template_name = "autoticketapp/template_form.html"
     success_url = TEMPLATE_URL
 
 class TemplateUpdateView(UpdateView):
     permission_required = 'autoticket.change_template'
     model = Template
-    fields = ["nome", "codigo"]
+    fields = ["titulo", "codigo"]
     template_name = "autoticketapp/template_form.html"
     success_url = TEMPLATE_URL
 
