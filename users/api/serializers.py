@@ -1,8 +1,7 @@
 from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
-from rest_framework.relations import PrimaryKeyRelatedField, RelatedField
-
+from rest_framework.relations import PrimaryKeyRelatedField,RelatedField
 
 from users.models import ObjectPermission, Token
 from .nested_serializers import *
@@ -20,7 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='users-api:user-detail')
     groups = PrimaryKeyRelatedField(
         queryset=Group.objects.all(),
-        serializer=NestedGroupSerializer,
         required=False,
         many=True
     )
@@ -28,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'url', 'display', 'username', 'password', 'first_name', 'last_name', 'email', 'is_staff', 'is_active',
+            'id', 'url', 'username', 'password', 'first_name', 'last_name', 'email', 'is_staff', 'is_active',
             'date_joined', 'groups',
         )
         extra_kwargs = {
@@ -37,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-       Extraia a senha dos dados validados e defina-a separadamente para garantir a geração de hash adequada.
+        Extract the password from validated data and set it separately to ensure proper hash generation.
         """
         password = validated_data.pop('password')
         user = super().create(validated_data)
@@ -58,7 +56,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ('id', 'url', 'display', 'name', 'user_count')
+        fields = ('id', 'url', 'name', 'user_count')
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -68,7 +66,7 @@ class TokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Token
-        fields = ('id', 'url', 'display', 'user', 'created', 'expires', 'key', 'write_enabled', 'description')
+        fields = ('id', 'url', 'user', 'created', 'expires', 'key', 'write_enabled', 'description')
 
     def to_internal_value(self, data):
         if 'key' not in data:
@@ -89,13 +87,11 @@ class ObjectPermissionSerializer(serializers.ModelSerializer):
     )
     groups = PrimaryKeyRelatedField(
         queryset=Group.objects.all(),
-        serializer=NestedGroupSerializer,
         required=False,
         many=True
     )
     users = PrimaryKeyRelatedField(
         queryset=User.objects.all(),
-        serializer=NestedUserSerializer,
         required=False,
         many=True
     )
@@ -103,6 +99,6 @@ class ObjectPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ObjectPermission
         fields = (
-            'id', 'url', 'display', 'name', 'description', 'enabled', 'object_types', 'groups', 'users', 'actions',
+            'id', 'url', 'name', 'description', 'enabled', 'object_types', 'groups', 'users', 'actions',
             'constraints',
         )
