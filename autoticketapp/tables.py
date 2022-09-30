@@ -3,6 +3,7 @@ from django_tables2.utils import Accessor
 from django_tables2.columns import TemplateColumn
 
 from .models import Ticket
+from .models import Team
 from .models import Template
 
 class BaseTable(tables.Table):
@@ -21,6 +22,21 @@ class TicketTable(tables.Table):
         model = Ticket
         template_name = "django_tables2/bootstrap4.html"
         fields = ("numero","titulo","descricao","data_inicio","prioridade","controls" )
+
+
+class TeamTable(tables.Table):
+
+    # numero = tables.LinkColumn(
+    #     viewname='autoticket:team_detail',
+    #     args=[Accessor('id')]
+    # )
+
+    controls = TemplateColumn(verbose_name=' ', template_name='autoticketapp/team_controls.html')
+
+    class Meta:
+        model = Team
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('equipe',)
         
 class TemplateTable(tables.Table):
 

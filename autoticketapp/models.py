@@ -46,6 +46,14 @@ class Ticket(models.Model):
         null= True,
     )
 
+#  Class to handle teams
+class Team(models.Model):
+    
+    equipe = models.CharField(
+        max_length=50,
+        verbose_name='Equipe',
+    )
+
 # Class to handle templates
 class Template(models.Model):
     
