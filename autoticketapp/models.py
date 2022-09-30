@@ -14,7 +14,8 @@ PRIORIDADE_CHOICES = [
     (PRIORIDADE_BAIXA, 5),
 ]
 
-class Ticket (models.Model):
+# Class to handle tickets
+class Ticket(models.Model):
 
     numero = models.IntegerField(
         null = True,
@@ -44,3 +45,17 @@ class Ticket (models.Model):
     data_fim = models.DateTimeField(
         null= True,
     )
+
+# Class to handle templates
+class Template(models.Model):
+    
+    nome = models.CharField(
+        max_length=100,
+        verbose_name='Nome',
+    )
+    
+    codigo = models.TextField(
+        verbose_name='Código',
+    )
+    
+    
