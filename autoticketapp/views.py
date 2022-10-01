@@ -2,6 +2,8 @@ from django.views.generic import View
 from django.shortcuts import  render, redirect
 from django.urls import reverse
 
+from users.querysets import RestrictedQuerySet
+
 from users.utilities.view import TableView, CreateView, UpdateView, DeleteView, DetailView
 from .models import (
     Ticket,
@@ -214,4 +216,15 @@ class ProvisionStart(View):
         return render(request, self.template_name, {
             'ticket': ticket,
             'templates': templates
+        })
+
+class CatalogView(View):
+    template_name = 'autoticketapp/catalog.html'
+
+    def get(self, request):
+
+        teams = RestrictedQuerySet(model=Team).all()
+
+        return render(request, self.template_name, {
+            'teams': teams,
         })
