@@ -52,6 +52,10 @@ urlpatterns = [
     # Provision urls
     path('provision/<int:idTicket>', views.ProvisionStart.as_view(), name='provision_start'), 
     
-    path('report/', views.TeamReportView.as_view(), name='report')
+    # Report urls
+    path('report/', views.TeamReportView.as_view(), name='report'),
+
+    # Catalog urls
+    path('catalog/', views.CatalogView.as_view(), name='catalog'), 
 ]   
 

@@ -4,6 +4,8 @@ from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework.views import View as RestView
 
+from users.querysets import RestrictedQuerySet
+
 from users.utilities.view import TableView, CreateView, UpdateView, DeleteView, DetailView
 from .models import (
     Ticket,
@@ -227,4 +229,20 @@ class TeamReportView(RestView):
     def get(self, request):
         data = team_report()
         serializer = ReportSerializer(instance=data, many=True)
-        return Response(data=serializer.data)
+        
+        return render(request, self.template_name, {
+            'team': serializer['team'],
+            'group_count': serializer['group_count'],
+            'service_count': serializer['service_count'],
+            'template_count': serializer['template_count'],
+        })
+class CatalogView(View):
+    template_name = 'autoticketapp/catalog.html'
+
+    def get(self, request):
+
+        teams = RestrictedQuerySet(model=Team).all()
+
+        return render(request, self.template_name, {
+            'teams': teams,
+        })
