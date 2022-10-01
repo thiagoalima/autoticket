@@ -1,3 +1,6 @@
+{% if perms.autoticketapp.add_provision %}
+<a class="btn btn-sm btn-primary" href="{% url 'autoticket:provision_start' record.id %}">Provisionar</a>
+{% endif %}
 {% if perms.autoticketapp.change_ticket %}
 <a class="btn btn-sm btn-warning" href="{% url 'autoticket:ticket_edit' record.id %}">Editar</a>
 {% endif %}
