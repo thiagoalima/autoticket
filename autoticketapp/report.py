@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
+from rest_framework import serializers
 from django.db.models import Count
-from .models import Group, Service, Team, Template
+from .models import Group, Service, Team
 
 @dataclass
 class ReportEntry:
@@ -22,14 +23,14 @@ def team_report():
         template_count=Service.objects.values('templates').distinct(),   # substituir "Template" por query que busca os templates do grupo
     )
     
-    equipes_index = {}
-    for equipe in Team.objects.all():
-        equipes_index[equipe.pk] = equipe
+    team_index = {}
+    for team in Team.objects.all():
+        team_index[team.pk] = team
     
     for entry in querySet:
-        equipe = equipes_index.get(entry['nome'])
+        team = team_index.get(entry['nome'])
         report_entry = ReportEntry(
-            team=equipe,
+            team=team,
             group_count=entry['group_count'],
             service_count=entry['service_count'],
             template_count=entry['template_count']
@@ -38,3 +39,22 @@ def team_report():
         data.append(report_entry)
         
     return data
+
+class TeamSerializer(serializers.ModelSerializer):
+    """
+        Serialization of the team model
+    """
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Team
+        fields = ("id", "nome")
+    
+class ReportSerializer(serializers.Serializer):
+    """
+        Serialization of team report data
+    """
+    team = TeamSerializer()
+    group_count = serializers.IntegerField()
+    service_count = serializers.IntegerField()
+    template_count = serializers.IntegerField()

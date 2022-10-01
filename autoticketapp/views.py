@@ -1,6 +1,8 @@
 from django.views.generic import View
 from django.shortcuts import  render, redirect
 from django.urls import reverse
+from rest_framework.response import Response
+from rest_framework.views import View as RestView
 
 from users.utilities.view import TableView, CreateView, UpdateView, DeleteView, DetailView
 from .models import (
@@ -17,6 +19,8 @@ from .tables import (
     ServiceTable,
     TemplateTable,
 )
+
+from .report import team_report, ReportSerializer
 
 class HomeView(View):
     template_name = 'base/home.html'
@@ -215,3 +219,12 @@ class ProvisionStart(View):
             'ticket': ticket,
             'templates': templates
         })
+
+# View of report generation
+class TeamReportView(RestView):
+    template_name = 'autoticketapp/report.html'
+    
+    def get(self, request):
+        data = team_report()
+        serializer = ReportSerializer(instance=data, many=True)
+        return Response(data=serializer.data)

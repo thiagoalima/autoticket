@@ -51,5 +51,7 @@ urlpatterns = [
 
     # Provision urls
     path('provision/<int:idTicket>', views.ProvisionStart.as_view(), name='provision_start'), 
+    
+    path('report/', views.TeamReportView.as_view(), name='report')
 ]   
 
