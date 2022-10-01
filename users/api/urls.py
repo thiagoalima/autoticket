@@ -16,9 +16,6 @@ router.register('tokens', views.TokenViewSet)
 # Permissions
 router.register('permissions', views.ObjectPermissionViewSet)
 
-# User preferences
-router.register('config', views.UserConfigViewSet, basename='userconfig')
-
 app_name = 'users-api'
 urlpatterns = [
     path('tokens/provision/', views.TokenProvisionView.as_view(), name='token_provision'),
