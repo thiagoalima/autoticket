@@ -2,10 +2,8 @@ from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
-from rest_framework import serializers
-from rest_framework.relations import RelatedField
-
 from users.models import ObjectPermission, Token
+from rest_framework.relations import RelatedField
 
 __all__ = [
     'NestedGroupSerializer',

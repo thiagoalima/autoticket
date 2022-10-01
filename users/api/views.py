@@ -2,22 +2,21 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group, User
 from django.db.models import Count
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.routers import APIRootView
 from rest_framework.status import HTTP_201_CREATED
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from rest_framework.viewsets import ModelViewSet
-from autoticket.users.querysets import RestrictedQuerySet
-
 from users import filtersets
 from users.models import ObjectPermission, Token
+from ..querysets import RestrictedQuerySet
 from . import serializers
 
 
 class UsersRootView(APIRootView):
     """
-    Users API root view
+    Users API
     """
     def get_view_name(self):
         return 'Users'
@@ -50,7 +49,7 @@ class TokenViewSet(ModelViewSet):
 
     def get_queryset(self):
         """
-        Limite os não superusuários aos seus próprios Tokens.
+        Limit the non-superusers to their own Tokens.
         """
         queryset = super().get_queryset()
         # Workaround for schema generation (drf_yasg)
@@ -65,7 +64,7 @@ class TokenViewSet(ModelViewSet):
 
 class TokenProvisionView(APIView):
     """
-    Endpoint da API REST não autenticado por meio do qual um usuário pode criar um Token.
+    Non-authenticated REST API endpoint via which a user may create a Token.
     """
     permission_classes = []
 
@@ -77,10 +76,10 @@ class TokenProvisionView(APIView):
         username = serializer.data.get('username')
         password = serializer.data.get('password')
         if not username or not password:
-            raise AuthenticationFailed("O nome de usuário e a senha devem ser fornecidos para provisionar um token.")
+            raise AuthenticationFailed("Username and password must be provided to provision a token.")
         user = authenticate(request=request, username=username, password=password)
         if user is None:
-            raise AuthenticationFailed("username/password Invalido")
+            raise AuthenticationFailed("Invalid username/password")
 
         # Create a new Token for the User
         token = Token(user=user)

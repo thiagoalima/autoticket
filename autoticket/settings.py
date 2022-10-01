@@ -41,14 +41,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
     'django_tables2',
+    'django_filters',
     'bootstrap5',
     'crispy_forms',
     'crispy_bootstrap5',
+    'rest_framework',
     'autoticketapp',
+    'drf_yasg',
     'users',
 ]
 
-CRISPY_TEMPLATE_PACK = 'bootstrap5'
+# CRISPY FORM
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -88,6 +94,25 @@ AUTHENTICATION_BACKENDS = [
 EXEMPT_VIEW_PERMISSIONS = list(filter(None, environ.get('EXEMPT_VIEW_PERMISSIONS', '').split(' ')))
 
 WSGI_APPLICATION = 'autoticket.wsgi.application'
+
+#
+# Django REST framework (API)
+#
+
+LOGIN_REDIRECT_URL = '/api/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'users.api.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'users.api.authentication.TokenPermissions',
+    ),
+}
 
 
 # Database
