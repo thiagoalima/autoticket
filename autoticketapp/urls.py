@@ -20,4 +20,11 @@ urlpatterns = [
     path('template/add/', views.TemplateCreateView.as_view(), name='template_add'),         # Add new template
     path('template/edit/<pk>', views.TemplateUpdateView.as_view(), name='template_edit'),   # Edit selected template
     path('template/del/<pk>', views.TemplateDeleteView.as_view(), name='template_del'),     # Delete selected template
+    
+    # Team urls
+    path('team/', views.TeamListView.as_view(), name='team'),                   # All teams
+    path('team/<pk>', views.TeamDetailView.as_view(), name='team_detail'),      # Selected team
+    path('team/add/', views.TeamCreateView.as_view(), name='team_add'),         # Add new team
+    path('team/edit/<pk>', views.TeamUpdateView.as_view(), name='team_edit'),   # Edit selected team
+    path('team/del/<pk>', views.TeamDeleteView.as_view(), name='team_del'),     # Delete selected team
 ]
