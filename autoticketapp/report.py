@@ -17,9 +17,9 @@ def team_report():
     data = []
     
     querySet = Team.objects.values("nome").annotate(
-        group_count=Count(Group),        # substituir "Group" por query que busca os grupos da equipe
-        service_count=Count(Service),    # substituir "Service" por query que busca os serviços do grupo
-        template_count=Count(Template),   # substituir "Template" por query que busca os templates do grupo
+        group_count=Team.objects.values('groups').distinct(),       # substituir "Group" por query que busca os grupos da equipe
+        service_count=Group.objects.values('services').distinct(),    # substituir "Service" por query que busca os serviços do grupo
+        template_count=Service.objects.values('templates').distinct(),   # substituir "Template" por query que busca os templates do grupo
     )
     
     equipes_index = {}
