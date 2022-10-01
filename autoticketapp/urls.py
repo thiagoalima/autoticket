@@ -27,4 +27,26 @@ urlpatterns = [
     path('team/add/', views.TeamCreateView.as_view(), name='team_add'),         # Add new team
     path('team/edit/<pk>', views.TeamUpdateView.as_view(), name='team_edit'),   # Edit selected team
     path('team/del/<pk>', views.TeamDeleteView.as_view(), name='team_del'),     # Delete selected team
-]
+
+    # Group urls
+    path('group/', views.GroupListView.as_view(), name='group'),                   # All groups
+    path('group/<pk>', views.GroupDetailView.as_view(), name='group_detail'),      # Selected group
+    path('group/add/', views.GroupCreateView.as_view(), name='group_add'),         # Add new group
+    path('group/edit/<pk>', views.GroupUpdateView.as_view(), name='group_edit'),   # Edit selected group
+    path('group/del/<pk>', views.GroupDeleteView.as_view(), name='group_del'),     # Delete selected group
+
+    # Service urls
+    path('service/', views.ServiceListView.as_view(), name='service'),                   # All services
+    path('service/<pk>', views.ServiceDetailView.as_view(), name='service_detail'),      # Selected service
+    path('service/add/', views.ServiceCreateView.as_view(), name='service_add'),         # Add new service
+    path('service/edit/<pk>', views.ServiceUpdateView.as_view(), name='service_edit'),   # Edit selected service
+    path('service/del/<pk>', views.ServiceDeleteView.as_view(), name='service_del'),     # Delete selected service
+
+    # Template urls
+    path('template/', views.TemplateListView.as_view(), name='template'),                   # All templates
+    path('template/<pk>', views.TemplateDetailView.as_view(), name='template_detail'),      # Selected template
+    path('template/add/', views.TemplateCreateView.as_view(), name='template_add'),         # Add new template
+    path('template/edit/<pk>', views.TemplateUpdateView.as_view(), name='template_edit'),   # Edit selected template
+    path('template/del/<pk>', views.TemplateDeleteView.as_view(), name='template_del'),     # Delete selected template
+]   
+
