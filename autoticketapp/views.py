@@ -75,14 +75,14 @@ class TeamListView(TableView):
 class TeamCreateView(CreateView):
     permission_required = 'autoticket.add_team'
     model = Team
-    fields = ["equipe"]
+    fields = ["nome"]
     template_name = "autoticketapp/team_form.html"
     success_url = TEAM_URL
 
 class TeamUpdateView(UpdateView):
     permission_required = 'autoticket.change_team'
     model = Team
-    fields = ["equipe"]
+    fields = ["nome"]
     template_name = "autoticketapp/team_form.html"
     success_url = TEAM_URL
 
@@ -110,14 +110,14 @@ class GroupListView(TableView):
 class GroupCreateView(CreateView):
     permission_required = 'autoticket.add_group'
     model = Group
-    fields = ["titulo", "equipe"]
+    fields = ["nome", "equipe"]
     template_name = "autoticketapp/group_form.html"
     success_url = GROUP_URL
 
 class GroupUpdateView(UpdateView):
     permission_required = 'autoticket.change_group'
     model = Group
-    fields = ["titulo", "equipe"]
+    fields = ["nome", "equipe"]
     template_name = "autoticketapp/group_form.html"
     success_url = GROUP_URL
 
@@ -144,14 +144,14 @@ class ServiceListView(TableView):
 class ServiceCreateView(CreateView):
     permission_required = 'autoticket.add_service'
     model = Service
-    fields = ["nome", "status"]
+    fields = ["nome", "status","grupo"]
     template_name = "autoticketapp/service_form.html"
     success_url = SERVICE_URL
 
 class ServiceUpdateView(UpdateView):
     permission_required = 'autoticket.change_service'
     model = Service
-    fields = ["nome", "status"]
+    fields = ["nome", "status", "grupo"]
     template_name = "autoticketapp/service_form.html"
     success_url = SERVICE_URL
 
@@ -166,7 +166,7 @@ class ServiceDeleteView(DeleteView):
     Classes refering to the Template views
 """
 
-TEMPLATE_URL = '/autoticketapp/template/'
+TEMPLATE_URL = '/autoticket/template/'
 
 class TemplateDetailView (DetailView):
     model = Template

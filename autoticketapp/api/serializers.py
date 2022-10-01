@@ -1,13 +1,6 @@
 from rest_framework import serializers
 
-from .nested_serializers import *
-
-from ..views import Ticket
-
-
-__all__ = (
-    'TicketSerializer',
-)
+from ..models import Ticket,Team,Group,Service,Template
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -15,4 +8,30 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = '__all__'
+
+class TeamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Team
+        fields = '__all__'
+
+class GroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Group
+        fields = '__all__'
+
+class ServiceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+class TemplateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Template
+        fields = '__all__'
+
+
     
