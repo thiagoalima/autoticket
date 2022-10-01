@@ -48,5 +48,8 @@ urlpatterns = [
     path('template/add/', views.TemplateCreateView.as_view(), name='template_add'),         # Add new template
     path('template/edit/<pk>', views.TemplateUpdateView.as_view(), name='template_edit'),   # Edit selected template
     path('template/del/<pk>', views.TemplateDeleteView.as_view(), name='template_del'),     # Delete selected template
+
+    # Provision urls
+    path('provision/<int:idTicket>', views.ProvisionStart.as_view(), name='provision_start'), 
 ]   
 

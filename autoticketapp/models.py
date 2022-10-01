@@ -1,5 +1,8 @@
 from email.policy import default
+from re import template
 from django.db import models
+
+from django.contrib.auth.models import User
 
 PRIORIDADE_EMERGENCIAL = 1
 PRIORIDADE_URGENTE = 2
@@ -127,4 +130,32 @@ class Template(models.Model):
 
     def __str__(self):
         return self.titulo
+
+# Class to handle provision
+class provision(models.Model):
+
+    ticket = models.OneToOneField(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name='provision_ticket',
+    )
+
+    template = models.OneToOneField(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name='provision_template',
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='provisions',
+    )
+
+    date = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+
+
     

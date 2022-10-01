@@ -196,3 +196,22 @@ class TemplateDeleteView(DeleteView):
     model = Template
     template_name = "autoticketapp/confirm_delete.html"
     success_url = TEMPLATE_URL
+
+"""
+    Classes refering to the Provision views
+"""
+
+class ProvisionStart(View):
+    template_name = 'autoticketapp/provision.html'
+
+    def get(self, request, idTicket):
+        user = request.user
+
+        ticket = Ticket.objects.get(id=idTicket)
+
+        templates = Template.objects.all()
+
+        return render(request, self.template_name, {
+            'ticket': ticket,
+            'templates': templates
+        })
