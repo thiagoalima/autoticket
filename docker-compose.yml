@@ -1,0 +1,26 @@
+version: '3.4'
+services:
+  autoticket:
+    ports:
+      - 8000:8000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 
+      redeslab.info.ufrn.br:5050/teste/autoticket-docker
+    env_file: docker/env/autoticket.env
+    depends_on:
+    - postgres
+
+  # postgres
+  postgres:
+    ports:
+      - 5432:5432
+    image: postgres:14-alpine
+    env_file: docker/env/postgres.env
+    volumes:
+    - autoticket-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  autoticket-postgres-data:
+    driver: local
