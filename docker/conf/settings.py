@@ -22,14 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c-w0-joxoi*rb#h3aeltnt6nvld*fbx^8yf#x9c53k^95$muoi'
+SECRET_KEY = environ.get('SECRET_KEY', 'django-insecure-c-w0-joxoi*rb#h3aeltnt6nvld*fbx^8yf#x9c53k^95$muoi')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-FOLDER_REPOSITORY = '/home/thiagoabreulima/Desenvolvimento/repository'
 
 
 # Application definition
@@ -51,7 +49,6 @@ INSTALLED_APPS = [
     'autoticketapp',
     'drf_yasg',
     'users',
-    'repository',
 ]
 
 # CRISPY FORM
@@ -124,11 +121,11 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'autoticket',
-        'USER': 'autoticket',
-        'PASSWORD': '123456789',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': environ.get('DB_NAME', 'autoticket'),
+        'USER': environ.get('DB_USER', 'autoticket'),
+        'PASSWORD': environ.get('DB_PASSWORD', '123456789'),
+        'HOST': environ.get('DB_HOST', 'localhost'),
+        'PORT': environ.get('DB_PORT', '5432'),
     }
 }
 

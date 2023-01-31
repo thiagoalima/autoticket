@@ -35,7 +35,7 @@ class TeamViewSet(ModelViewSet):
 
 class GroupViewSet(ModelViewSet):
     queryset = RestrictedQuerySet(model=Group).all()
-    serializer_class = serializers.GroupSerializer
+    serializer_class = serializers.GroupTeamSerializer
 
 #
 # Service

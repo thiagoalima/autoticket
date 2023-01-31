@@ -1,3 +1,11 @@
+# Django
+django
+
+psycopg2-binary
+
+# Django Tables
+django_tables2
+
 # Django bootstrap v5
 django-bootstrap-v5
 
@@ -7,6 +15,12 @@ django-widget-tweaks
 # django rest framework
 djangorestframework
 
+# Crispy Forms
+django-crispy-forms
+
+# Crispy Bootstrap5
+crispy-bootstrap5
+
 # Markdown support for the browsable API.
 markdown       
 
@@ -15,3 +29,9 @@ django-filter
 
 # DRF
 drf-yasg
+
+# GitPython
+GitPython
+
+# Ansible
+ansible

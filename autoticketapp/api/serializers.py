@@ -15,7 +15,7 @@ class TeamSerializer(serializers.ModelSerializer):
         model = Team
         fields = '__all__'
 
-class GroupSerializer(serializers.ModelSerializer):
+class GroupTeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
