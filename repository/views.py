@@ -5,6 +5,7 @@ from .models import (
     Repository
 )
 
+
 """
     Classes refering to the Repo views
 """
@@ -16,18 +17,21 @@ class RepoListView(TableView):
     model = Repository
     table_class = RepositoryTable
     template_name = 'repository/repo_list.html'
+    ordering = ['-id']
 
 class RepoCreateView(CreateView):
     permission_required = 'repository.add_repo'
     model = Repository
     fields = ["nome","url","token","token_key"]
     template_name = "repository/repo_form.html"
+    success_url = "/repository/repo/"
 
 class RepoUpdateView(UpdateView):
     permission_required = 'repository.change_repo'
     model = Repository
     fields = ["nome","url","token","token_key"]
     template_name = "repository/repo_form.html"
+    success_url = "/repository/repo/"
 
 class RepoDeleteView(DeleteView):
     permission_required = 'repository.delete_repo'

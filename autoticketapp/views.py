@@ -45,6 +45,7 @@ class TicketListView(TableView):
     model = Ticket
     table_class = TicketTable
     template_name = 'autoticketapp/ticket_list.html'
+    ordering = ['-id']
 
 class TicketCreateView(CreateView):
     permission_required = 'autoticketapp.add_ticket'
