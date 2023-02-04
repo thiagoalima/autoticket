@@ -2,7 +2,6 @@ from django.db import models
 import os
 import yaml
 
-
 class Host():
 
     def __init__(self,value):
@@ -139,7 +138,7 @@ class PlaybookFile():
         self.folder = folder
         self.playbooks = []
         self.loader = LoadPlaybook(folder)
-    
+
     def deserialize(self, data):
         for p in data:
             playbook = Playbook(folder=self.folder)
