@@ -29,7 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-FOLDER_REPOSITORY = '/home/thiagoabreulima/Desenvolvimento/repository'
+FOLDER_REPOSITORY = '/home/thiagoabreu/Desenvolvimento/repository'
 
 
 # Application definition
@@ -47,11 +47,13 @@ INSTALLED_APPS = [
     'bootstrap5',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_bootstrap_icons',
     'rest_framework',
     'autoticketapp',
     'drf_yasg',
     'users',
     'repository',
+    'iac'
 ]
 
 # CRISPY FORM
@@ -125,8 +127,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'autoticket',
-        'USER': 'autoticket',
-        'PASSWORD': '123456789',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5432',
     }

@@ -7,6 +7,8 @@ from .models import (
     Repository
 )
 
+from iac.models import InventoryParameter
+
 
 """
     Classes refering to the Repo views
@@ -51,7 +53,8 @@ class PlaybookDetailView (DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         playbookRepository = self.object.getPlaybookRepository()
-        context = {'playbookRepository':playbookRepository}
+        inventoryParameters = InventoryParameter.objects.all()
+        context = {'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
         return self.render_to_response(context)
 
 class AddHostView(CreateView):

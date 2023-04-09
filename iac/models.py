@@ -2,6 +2,40 @@ from django.db import models
 import os
 import yaml
 
+class TypeInput(models.Model):
+
+    type = models.CharField(
+        max_length=100,
+        verbose_name='type',
+    )
+
+
+class InventoryParameter(models.Model):
+
+    name = models.CharField(
+        max_length=100,
+        verbose_name='name',
+    )
+
+    description = models.TextField(
+        verbose_name='description',
+        null=True,
+        blank=True
+    )
+
+    type = models.ForeignKey(
+        TypeInput,
+        on_delete=models.CASCADE,
+        related_name='inventoryParameters',
+    )
+
+    value = models.TextField(
+        verbose_name='value',
+         null=True,
+         blank=True
+    )
+     
+
 class Host():
 
     def __init__(self,value):

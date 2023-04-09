@@ -9,6 +9,9 @@ django_tables2
 # Django bootstrap v5
 django-bootstrap-v5
 
+# Django bootstrap icons
+django-bootstrap-icons
+
 # Django Widget Tweaks
 django-widget-tweaks
 

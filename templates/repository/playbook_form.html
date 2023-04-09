@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 {% load crispy_forms_tags %}
+{% load bootstrap_icons %}
 {% load filters %}
 
 {% block content %}
@@ -123,6 +124,25 @@
             <div class="mb-3">
                 <label for="hostForm" class="form-label">Host</label>
                 <input type="text" name="host" class="form-control" id="host" aria-describedby="host">
+                <div class="input-group">
+                  <select id="inventoryParameterSelect" class="form-select" aria-label="Parametro de inventorio">
+                    <option selected>Selecione um parâmetro de inventorio</option>
+                    {% for InventoryParameter in inventoryParameters %}
+                      <option value="{{InventoryParameter.id}}">{{InventoryParameter.name}}</option>
+                    {% endfor%}
+                  </select>
+                  <button id="typeParameterButton" class="btn btn-outline-secondary" type="button" onclick="addInventoryParameter(this)">Adicionar</button>
+                </div>
+                <div class="card">
+                  <div class="card-header">
+                    Inventory Parameters
+                  </div>
+                  <div class="card-body">
+                    <div id="inventoryParameterDiv" class="input-group">
+
+                    </div>
+                  </div>
+                </div>
             </div>
         </div>
         <div class="modal-footer">
@@ -145,7 +165,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-          <input type="hidden" name="host">
+          <input type="hidden" name="host"> 
           <select name="groups" class="form-select" multiple aria-label="Select groups">
             {% for name, group in playbookRepository.inventoryRepository.inventory.groups.items %}
               {% if name not in 'all,ungrouped' %}
@@ -162,6 +182,33 @@
   </div>
 </div>
 </form>
+<script>
+
+  function removeInventoryParameter(id){
+    var elem = document.getElementById(id);
+    elem.parentNode.removeChild(elem);
+  }
+
+  function addInventoryParameter(button){
+    var base_url = window.location.origin;
+    var id = document.getElementById("inventoryParameterSelect").value;
+    var url = base_url+'/iac/inventoryParameter/'+id;
+    
+    var xhrobj = new XMLHttpRequest();
+    xhrobj.open('GET',url);
+    xhrobj.send();
+
+    xhrobj.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        var idParameter = id+'_div_parameter';
+        var htmlDiv = '<div id="'+idParameter+'" class="input-group"> '+ xhrobj.responseText;
+        htmlDiv += '<button class="btn btn-outline-secondary" type="button" onclick="removeInventoryParameter(\''+idParameter+'\')"><span class="bi-trash"></span></button>'
+        htmlDiv += '</div>'
+        document.getElementById("inventoryParameterDiv").innerHTML += htmlDiv;
+      }
+    }
+  }
+</script>
 
 
 {% endblock %}
