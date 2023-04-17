@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import os
 
 from pathlib import Path
 
 from os import environ
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,6 +89,14 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+# Static files (CSS, JavaScript, Images)
+STATIC_ROOT = f'{BASE_DIR}/static'
+STATIC_URL = f'/{BASE_DIR}/static/'
+
+STATICFILES_DIRS = [
+	os.path.join(STATIC_URL,'js')
 ]
 
 # Set up authentication backends

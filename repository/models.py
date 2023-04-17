@@ -1,6 +1,7 @@
 from django.db import models
 from ansible.inventory.manager import InventoryManager
 from ansible.playbook import Playbook
+from ansible.playbook.play import Play
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.parsing.dataloader import DataLoader
 from ansible.cli.galaxy import GalaxyCLI
@@ -51,10 +52,12 @@ class Repository(models.Model):
         if not isExist:
             os.makedirs(self.folderRepository())
             Repo.clone_from(self.url, self.folderRepository())
-            #TODO criar pastas group_vars e host_vars
+            os.makedirs(self.folderRepository()+'/group_vars')
+            os.makedirs(self.folderRepository()+'/host_vars')
             #criar um projeto em branco 
             cli = GalaxyCLI(args=["ansible-galaxy", "init", self.nome,"--init-path", self.folderRepository()+'/roles',"--force"])
             cli.run()
+            
         
         #bloco de teste
         self.playbookRepository = self.getPlaybookRepository()
@@ -105,6 +108,20 @@ class InventoryRepository():
     def url_inventory_hosts(self):
         return self.repository.folderRepository()+'/hosts'
     
+    def remove_host_vars_file(self, host):
+        if host in self.host_vars:
+            del self.host_vars[host]
+
+        if os.path.exists(self.url_host_vars(host)):
+            os.remove(self.url_host_vars(host))
+    
+    def remove_group_vars_file(self, group):
+        if group in self.group_vars:
+            del self.group_vars[group]
+
+        if os.path.exists(self.url_group_vars(group)):
+            os.remove(self.url_group_vars(group))
+    
     def load_files_vars(self):
         for key,host in self.inventory.hosts.items():
             self.host_vars[key] = get_vars_from_path(self.loader, self.repository.folderRepository(), [host], 'all')
@@ -112,6 +129,18 @@ class InventoryRepository():
         for key,group in self.inventory.groups.items():
             if group.name not in ['all','ungrouped']:
                 self.group_vars[key] = get_vars_from_path(self.loader, self.repository.folderRepository(), [group], 'all')
+    
+    def addVarsHost(self,host,vars):
+        self.host_vars[host] = vars
+
+    def getHostVars(self,host):
+        return self.host_vars[host]
+    
+    def addVarsGroup(self,group,vars):
+        self.group_vars[group] = vars
+
+    def getGroupVars(self,host):
+        return self.group_vars[host]
     
     def saveInventory(self):
         for host,vars in self.host_vars.items():
@@ -157,7 +186,19 @@ class PlaybookRepository():
         self.inventoryRepository = inventoryRepository
         if not inventoryRepository:
             self.inventoryRepository = InventoryRepository(repository=self.repository)
-    
+
+    def addPlaybook(self,filename, data):
+        loader = DataLoader()
+        loader.set_basedir(self.repository.folderRepository())
+        playbook = Playbook(loader=loader)
+        playbook._file_name = filename
+
+        for d in data:
+            play = Play()
+            play.deserialize({"name":d})
+            playbook._entries.append(play)
+        
+        self.playbooks.append(playbook)
     
     def retirar_nulos(self, data,listAtrribute=None):
         if listAtrribute:
@@ -219,6 +260,8 @@ class PlaybookRepository():
 
     def salvarPlaybooks(self):
         for playbook in self.playbooks:
+            filename = os.path.basename(playbook._file_name)
+            dataPlaybook = []
             for p in playbook._entries:
                 validos = self.retirar_nulos(p.serialize(), ATTRIBUTES_PLAYBOOK)
 
@@ -230,11 +273,12 @@ class PlaybookRepository():
                 for r in p.roles:
                     roles.append(r._role_name)
 
-                data['roles'] = roles
+                if roles:
+                    data['roles'] = roles
 
-                filename = os.path.basename(playbook._file_name)
+                dataPlaybook.append(data)
 
-                self.salvarYaml([data],filename=filename)
+            self.salvarYaml(dataPlaybook,filename=filename)
             
             
 

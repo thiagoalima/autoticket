@@ -34,6 +34,31 @@ class InventoryParameter(models.Model):
          null=True,
          blank=True
     )
+
+class PlaybookParameter(models.Model):
+
+    name = models.CharField(
+        max_length=100,
+        verbose_name='name',
+    )
+
+    description = models.TextField(
+        verbose_name='description',
+        null=True,
+        blank=True
+    )
+
+    type = models.ForeignKey(
+        TypeInput,
+        on_delete=models.CASCADE,
+        related_name='playbookParameters',
+    )
+
+    value = models.TextField(
+        verbose_name='value',
+         null=True,
+         blank=True
+    )
      
 
 class Host():
@@ -127,7 +152,7 @@ class Role():
         load.loadRole(self)
 
 
-class Playbook():
+""" class Playbook():
 
     def __init__(self,name=None, hosts=None, folder=None):
         self.folder = folder
@@ -163,7 +188,7 @@ class Playbook():
                     handler.deserialize(h)
                     self.handlers.append(handler)
             else: 
-                self.attributes[key]=value
+                self.attributes[key]=value """
 
 class PlaybookFile():
 

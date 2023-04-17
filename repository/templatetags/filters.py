@@ -23,3 +23,10 @@ def not_in(lista, args):
 @register.filter()
 def list_to_string(list, sep):
     return str(sep).join([str(i) for i in list])
+
+@register.filter()
+def list_to_string_by_attr(list, args):
+    params = args.split(',')
+    attr = params[0]
+    sep = params[1]
+    return str(sep).join([str(getattr(i, attr)) for i in list])
