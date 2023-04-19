@@ -9,10 +9,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # setup environment variable  
-ENV DockerHOME=/home/app/autoticket  
+ENV DockerHOME=/home/app/autoticket
+ENV Repository=/home/app/repository
 
 # set work directory  
 RUN mkdir -p $DockerHOME  
+RUN mkdir -p $Repository
 
 # install dependencies  
 RUN pip install --upgrade pip 
@@ -20,14 +22,10 @@ RUN pip install --upgrade pip
 # copy whole project to your docker home directory. 
 COPY . $DockerHOME
 
-COPY docker/conf/settings.py $DockerHOME/autoticket/settings.py
-
 COPY docker/docker-entrypoint.sh $DockerHOME
 
 # where your code lives  
 WORKDIR $DockerHOME 
-
-RUN cat autoticket/settings.py
 
 RUN chmod 777 docker-entrypoint.sh
 

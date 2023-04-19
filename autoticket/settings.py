@@ -31,7 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-FOLDER_REPOSITORY = '/home/thiagoabreu/Desenvolvimento/repository'
+FOLDER_REPOSITORY = environ.get('Repository', '/home/thiagoabreu/Desenvolvimento/repository') 
 
 
 # Application definition
@@ -132,15 +132,14 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'autoticket',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': environ.get('DB_NAME', 'autoticket'),
+        'USER': environ.get('DB_USER', 'postgres'),
+        'PASSWORD': environ.get('DB_PASSWORD', 'postgres'),
+        'HOST': environ.get('DB_HOST', 'localhost'),
+        'PORT': environ.get('DB_PORT', '5432'),
     }
 }
 

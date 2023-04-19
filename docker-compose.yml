@@ -14,6 +14,7 @@ services:
 
   # postgres
   postgres:
+    hostname: autoticket-postgres
     ports:
       - 5432:5432
     image: postgres:14-alpine

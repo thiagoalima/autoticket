@@ -85,8 +85,8 @@ class AddTaskPlaybookView(CreateView):
                         #task = Task()
                         #setattr(task,'name',name)
                         #setattr(task,'action',action)
-                        tasks = getattr(play,'tasks')
-                        tasks.append({"name":name,action:None})
+                        tasks = []#getattr(play,'tasks')
+                        tasks.append({"name":name,action: ''})
                         setattr(play,'tasks',tasks)
     
         playbookRepository.salvarPlaybooks();
