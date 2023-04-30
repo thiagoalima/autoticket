@@ -2,6 +2,66 @@ from django.db import models
 import os
 import yaml
 
+class AnsibleModule(models.Model): 
+
+    name = models.CharField(
+        max_length=200,
+        verbose_name='name',
+        blank=True
+    )
+
+    collection = models.CharField(
+        max_length=200,
+        verbose_name='collection',
+        blank=True
+    )
+
+    description = models.CharField(
+        max_length=200,
+        verbose_name='description',
+        null=True,
+        blank=True
+    )
+
+class AnsibleModuleVariable (models.Model):
+
+    module = models.ForeignKey(
+        AnsibleModule,
+        on_delete=models.CASCADE,
+        related_name='ansible_modules',
+        blank=True
+    )
+    
+    name = models.CharField(
+        max_length=200,
+        verbose_name='name',
+        blank=False
+    )
+    
+    description = models.TextField(
+        verbose_name='description',
+         null=True,
+         blank=True
+    )
+    
+    variable_type = models.CharField(
+        max_length=200,
+        verbose_name='type',
+        null=True,
+        blank=True
+    )
+    
+    choices = models.CharField(
+        max_length=255,
+        verbose_name='choices',
+        null=True,
+        blank=True
+    )
+    
+    required = models.BooleanField(
+        default=False
+    )
+
 class TypeInput(models.Model):
 
     type = models.CharField(

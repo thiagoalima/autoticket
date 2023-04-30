@@ -26,5 +26,6 @@ urlpatterns = [
     path('playbook/play/host/add/<pk>',views.AddHostPlaybookView.as_view(), name='playbook_host_add'),
     path('playbook/play/vars/add/<pk>',views.AddVarsPlaybookView.as_view(), name='playbook_vars_add'),
     path('playbook/play/task/add/<pk>',views.AddTaskPlaybookView.as_view(), name='playbook_task_add'),
+    path('playbook/play/tasks/<pk>',views.TaskDetailView.as_view(), name='playbook_task_detail'),
 ]   
 

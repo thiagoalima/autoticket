@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-c-w0-joxoi*rb#h3aeltnt6nvld*fbx^8yf#x9c53k^95$muoi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 FOLDER_REPOSITORY = environ.get('Repository', '/home/thiagoabreu/Desenvolvimento/repository') 
 

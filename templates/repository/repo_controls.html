@@ -3,4 +3,5 @@
 {% endif %}
 {% if perms.repository.delete_repo %}
 <a class="btn btn-sm btn-danger" href="{% url 'repository:repo_del' record.id %}">Deletar</a>
-{% endif %}
+{% endif %} 
+<a class="btn btn-sm btn-primary" href="{% url 'repository:playbook_detail' record.id %}">IaC</a>

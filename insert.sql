@@ -1,3 +1,12 @@
+INSERT INTO public.iac_typeinput ("type") VALUES
+	 ('input'),
+	 ('text'),
+	 ('password'),
+	 ('select'),
+	 ('file'),
+	 ('radio'),
+	 ('checkbox');
+
 INSERT INTO public.iac_inventoryparameter("name", description, value, type_id)
 VALUES
 ('ansible_connection', 'Tipo de conexão utilizada para acessar o host (ssh, local, etc.).','local, ssh, paramiko, winrm, docker, jail, lxc, lxd, smart',4),

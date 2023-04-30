@@ -10,8 +10,10 @@ from .models import (
     Repository
 )
 
-from iac.models import InventoryParameter, PlaybookParameter
+from iac.models import InventoryParameter, PlaybookParameter, AnsibleModule, AnsibleModuleVariable
 
+from ansible.playbook.block import Block
+from django.http import JsonResponse
 
 """
     Classes refering to the Repo views
@@ -48,9 +50,6 @@ class RepoDeleteView(DeleteView):
 """
     Classes refering to the Playbook views
 """
-
-
-
 class PlaybookDetailView (DetailView):
     model = Repository
     template_name = "repository/playbook_form.html"
@@ -60,9 +59,35 @@ class PlaybookDetailView (DetailView):
         playbookRepository = self.object.getPlaybookRepository()
         inventoryParameters = InventoryParameter.objects.all()
         playbookParameters = PlaybookParameter.objects.all()
+        ansibleModules = AnsibleModule.objects.all()
 
-        context = {'playbookParameters': playbookParameters, 'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
+        context = {'ansibleModules':ansibleModules,'playbookParameters': playbookParameters, 
+                   'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
         return self.render_to_response(context)
+    
+class TaskDetailView (DetailView):
+    model = Repository
+    template_name = "repository/playbook_form.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        playbookRepository = self.object.getPlaybookRepository()
+
+        playbookHost = request.GET['playbook']
+        filename = request.GET['filename']
+
+        tasks = []
+        jsonTask = []
+        for playbook in playbookRepository.playbooks:
+            if filename in playbook._file_name:
+                for play in playbook.get_plays():
+                    if playbookHost == play.get_name():
+                        tasks = getattr(play,'tasks')
+        for b in tasks:
+            for t in b.block:
+                jsonTask.append({'name':t.name,'action':t.action, t.action:t.args})
+
+        return JsonResponse(jsonTask, safe=False)
 
 class AddTaskPlaybookView(CreateView):
     model = Repository
@@ -72,24 +97,40 @@ class AddTaskPlaybookView(CreateView):
         self.object = self.get_object()
         playbookRepository = self.object.getPlaybookRepository()
         inventoryParameters = InventoryParameter.objects.all()
+        
 
         playbookHost = request.POST['playbook']
         filename = request.POST['filename']
         name = request.POST['name']
-        action = request.POST['action']
+        idModule = request.POST['actionSelect']
 
+        ansibleModule = AnsibleModule.objects.get(id=idModule)
+        
+        params_data = {}    
+        all_post_data = request.POST.dict()
+        for line in all_post_data:
+            if line.startswith('param__'):
+                params_key = line.replace('param__','')
+                if all_post_data[line]:
+                    params_data[params_key]=all_post_data[line]
+
+        tasks = []
         for playbook in playbookRepository.playbooks:
             if filename in playbook._file_name:
                 for play in playbook.get_plays():
                     if playbookHost == play.get_name():
-                        #task = Task()
-                        #setattr(task,'name',name)
-                        #setattr(task,'action',action)
-                        tasks = []#getattr(play,'tasks')
-                        tasks.append({"name":name,action: ''})
+                        #block = Block()
+                        task = Task()
+                        setattr(task,'name',name)
+                        setattr(task,'action',ansibleModule.name)
+                        setattr(task,'args',params_data)
+                        tasks = getattr(play,'tasks')
+                        tasks.append(task)
+                        #tasks.append({"name":name,ansibleModule.name: params_data})
                         setattr(play,'tasks',tasks)
     
         playbookRepository.salvarPlaybooks();
+
         context = {'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
         return self.render_to_response(context)
 
@@ -122,6 +163,7 @@ class AddVarsPlaybookView(CreateView):
                             setattr(play,k,v)
     
         playbookRepository.salvarPlaybooks();
+
         context = {'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
         return self.render_to_response(context)
     
@@ -149,6 +191,7 @@ class AddHostPlaybookView(CreateView):
                             setattr(play,'hosts',','.join(groups))
     
         playbookRepository.salvarPlaybooks();
+
         context = {'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
         return self.render_to_response(context)
 

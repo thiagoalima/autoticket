@@ -7,6 +7,17 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'autoticket.settings')
+
+    from django.conf import settings
+
+    if settings.DEBUG:
+        if os.environ.get('DJANGO_DEBUG') and 'runserver' in sys.argv:
+            import debugpy
+            print('DEBUG ESCUTANDO NA PORTA 3000!')
+            debugpy.listen(("0.0.0.0", 3000))
+            debugpy.wait_for_client()
+            print('Attached!')
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

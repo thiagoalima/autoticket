@@ -117,22 +117,22 @@
                         <tr>
                             <td>{{playbookFile|get_item:"_file_name"|basename}}</td>
                             <td>
-                              {{playbookFile.get_plays|list_to_string_by_attr:"_name, "}}
+                              {{playbookFile.get_plays|list_to_string_by_attr:"name, "}}
                             </td>
                             <td>
                               <button type="button" class="btn btn-success btn-sm" onclick="editFile('{{playbookFile.name}}')">
                                 <span class="bi-journal-arrow-up"></span>
                                 Edit File
                               </button>
-                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookHost('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"_name, "}}')">
+                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookHost('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name, "}}')">
                                 <span class="bi-window-plus"></span>
                                 add Hosts
                               </button>
-                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookVars('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"_name, "}}')">
+                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookVars('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name, "}}')">
                                 <span class="bi-window-plus"></span>
                                 add Vars
                               </button>
-                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookTask('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"_name, "}}')">
+                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookTask('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name, "}}')">
                                 <span class="bi-window-plus"></span>
                                 add Task
                               </button>
@@ -144,36 +144,12 @@
         </div>
       </div>
     </div>
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="roles">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-          Accordion Item #2
-        </button>
-      </h2>
-      <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-          <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-        </div>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingThree">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-          Accordion Item #3
-        </button>
-      </h2>
-      <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-        </div>
-      </div>
-    </div>
 </div>
 
 <!-- Modal -->
 
 <!-- addplaybookTaskModal -->
-<form method="post" action="{% url 'repository:playbook_task_add' playbookRepository.repository.id %}">
+<form method="post" id="formAddPlaybookTask" action="{% url 'repository:playbook_task_add' playbookRepository.repository.id %}">
   {% csrf_token %}
 <div class="modal fade" id="addplaybookTaskModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -185,14 +161,48 @@
       <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Playbook:</label>
-            <select id="taskPlaybookId" name="playbook" class="form-select" aria-label="Select playbook">
+            <select id="taskPlaybookId" name="playbook" class="form-select" aria-label="Select playbook" onchange="changePlaybook(this,'tableActionsPlaybook')">
             </select>
             <input type="hidden" id="filenamePlaybookTask" name="filename">
+            <input type="hidden" id="idRepository" name="repository" value="{{playbookRepository.repository.id }}">
 
-            <label class="form-label">Name</label>
-            <input type="text" name="name" class="form-control">
-            <label class="form-label">Action</label>
-            <input type="text" name="action" class="form-control">
+              <label class="form-label">Name</label>
+              <input id="taskName" type="text" name="name" class="form-control">
+              <label class="form-label">Action</label>
+              <select id="actionTaskPlaybook" name="actionSelect" class="form-select" aria-label="Select Action" onchange="changeAction(this,'varsTaskPlaybookDiv')">
+                <option value="0">Select Module</option>
+                {% for module in ansibleModules %}
+                  <option value="{{module.id}}">{{module.name}}</option>
+                {% endfor%}
+              </select>
+
+              <div class="card">
+                <div class="card-header">Options</div>
+                <div class="card-body">
+                  <div id="varsTaskPlaybookDiv">
+                                  
+
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-primary btn-sm" type="button" onclick="salvarTask()"><span class="bi-plus"></span> Add</button>
+                  </div>
+                </div>
+
+            </div>
+
+
+            <div class="card">
+              <div class="card-header">
+                Actions
+              </div>
+              <div class="card-body">
+                <div id="actionsPlaybookDiv" class="list-group">
+                  
+                </div>
+              </div>
+            </div>
 
           </div>
       </div>
@@ -500,6 +510,102 @@
 <script>
   $('#playbookGroupDiv').hide();
 
+  function salvarTask(){
+    var base_url = window.location.origin;
+    var id = $('#idRepository').val();
+    var playbook = $('#taskPlaybookId').val();
+    var filename = $('#filenamePlaybookTask').val();
+    var dataTask = {'playbook':playbook,'filename':filename}
+
+    var form = $('#formAddPlaybookTask').serialize();
+  
+    $.post(base_url+'/repository/playbook/play/task/add/'+id, form,function( data ) {
+      $.get(base_url+'/repository/playbook/play/tasks/'+id,dataTask,function(data){
+        content = ''
+        
+        data.forEach(function(t){
+          content += '<a href="#" class="list-group-item list-group-item-action" aria-current="true">'+
+                      '<div class="container">'+
+                        '<div class="row">'+
+                          '<div class="col-10">'+
+                            '<div class="d-flex w-100 justify-content-between">'+
+                              '<h5 class="mb-1">-name: '+t.name+'</h5>'+
+                            '</div>'+
+                            '<p class="mb-1"><p>'+t.action+':</p>';
+                            Object.keys(t[t.action]).forEach(function(key){
+                              content += key+': '+t[t.action][key]+'<br>\n';
+                            });
+                              content += ' </p>';
+               content += '</div>'+
+                          '<div class="col-2 align-self-center">'+
+                            '<button class="btn btn-outline-secondary right" type="button" onclick="removerTask(\''+filename+'\''+t.name+')"> <span class="bi-trash"></span> </button>'+
+                          '</div>'+
+                       '</div> '+
+                      '</div>'+
+                     '</a>';
+        });
+        $("#actionsPlaybookDiv").html(content);
+      })
+    });
+  }
+
+  function showOption(){
+    opt = $('#selectOptionHidden').val();
+    $('#option'+opt).removeAttr('hidden');
+  }
+
+  function changePlaybook(select,table){
+    var base_url = window.location.origin;
+    var playbook = select.value;
+
+    if (playbook != 0){ 
+      var id = $('#idRepository').val();
+      var playbook = select.value;
+      var filename = $('#filenamePlaybookTask').val();
+      var dataTask = {'playbook':playbook,'filename':filename}
+
+      $.get(base_url+'/repository/playbook/play/tasks/'+id,dataTask,function(data){
+        content = ''
+        
+        data.forEach(function(t){
+          content += '<a href="#" class="list-group-item list-group-item-action" aria-current="true">'+
+                      '<div class="container">'+
+                        '<div class="row">'+
+                          '<div class="col-10">'+
+                            '<div class="d-flex w-100 justify-content-between">'+
+                              '<h5 class="mb-1">-name: '+t.name+'</h5>'+
+                            '</div>'+
+                            '<p class="mb-1"><p>'+t.action+':</p>';
+                            Object.keys(t[t.action]).forEach(function(key){
+                              content += key+': '+t[t.action][key]+'<br>\n';
+                            });
+                              content += ' </p>';
+               content += '</div>'+
+                          '<div class="col-2 align-self-center">'+
+                            '<button class="btn btn-outline-secondary right" type="button" onclick="removerTask(\''+filename+'\''+t.name+')"> <span class="bi-trash"></span> </button>'+
+                          '</div>'+
+                       '</div> '+
+                      '</div>'+
+                     '</a>';
+        });
+        $("#actionsPlaybookDiv").html(content);
+      })
+    }
+  }
+
+  function changeAction(select,div){
+    var id = select.value
+    var base_url = window.location.origin;
+
+    if(id != 0){
+      $.get( base_url+'/iac/ansibleModuleVariable/'+id, function( data ) {
+        $("#"+div).html( data );
+      });
+    }else{
+      $("#"+div).html(' ');
+    }
+  }
+
   function changeTypeHost(select){
     var option = select.value
 
@@ -531,6 +637,7 @@
 
     $('#filenamePlaybookTask').val(filename);
 
+    $("#taskPlaybookId").append(new Option('select Playbook', 0));
     playbooks.forEach(function(nome, i) {
       $("#taskPlaybookId").append(new Option(nome, nome));
     })

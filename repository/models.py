@@ -2,7 +2,8 @@ from django.db import models
 from ansible.inventory.manager import InventoryManager
 from ansible.playbook import Playbook
 from ansible.playbook.play import Play
-from ansible.parsing.yaml.dumper import AnsibleDumper
+#from ansible.parsing.yaml.dumper import AnsibleDumper
+from .dumper import AnsibleDumperRepository
 from ansible.parsing.dataloader import DataLoader
 from ansible.cli.galaxy import GalaxyCLI
 from ansible.vars.manager import VariableManager
@@ -12,6 +13,7 @@ from django.conf import settings
 from git import Repo
 from .constants import ATTRIBUTES_TASK, ATTRIBUTES_PLAYBOOK
 import configparser
+from datetime import datetime
 import yaml
 import os
 
@@ -46,12 +48,27 @@ class Repository(models.Model):
     def folderRepository(self):
         return settings.FOLDER_REPOSITORY+'/'+self.nome
     
+    def urlGit(self):
+        return f'http://{self.token}:{self.token_key}@{self.url}'
+    
+    def commitAndPush(self):
+        dataAtual= datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        commit_message = f'commit realizado em {dataAtual}'
+
+        repo = Repo(self.folderRepository())
+
+        repo.git.add('--all')
+        repo.index.commit(commit_message)
+
+        origin = repo.remote(name='origin')
+        origin.push()
+    
     def save(self, *args, **kwargs):
         isExist = os.path.exists(self.folderRepository())
 
         if not isExist:
             os.makedirs(self.folderRepository())
-            Repo.clone_from(self.url, self.folderRepository())
+            Repo.clone_from(self.urlGit(), self.folderRepository())
             os.makedirs(self.folderRepository()+'/group_vars')
             os.makedirs(self.folderRepository()+'/host_vars')
             #criar um projeto em branco 
@@ -146,14 +163,16 @@ class InventoryRepository():
         for host,vars in self.host_vars.items():
             if vars:
                 with open(self.url_host_vars(host), 'w+') as fileHost:
-                    documents = yaml.dump(vars, fileHost, Dumper=AnsibleDumper, explicit_start=True, explicit_end=True, sort_keys=False, default_flow_style=False,default_style='', allow_unicode=True)
+                    documents = yaml.dump(vars, fileHost, Dumper=AnsibleDumperRepository, explicit_start=True, explicit_end=True, sort_keys=False, default_flow_style=False,default_style='', allow_unicode=True)
         for group,vars in self.group_vars.items():
             if vars:
                 with open(self.url_group_vars(group), 'w') as fileGroup:
-                    documents = yaml.dump(vars, fileGroup, Dumper=AnsibleDumper, explicit_start=True, explicit_end=True, sort_keys=False, default_flow_style=False,default_style='', allow_unicode=True)
+                    documents = yaml.dump(vars, fileGroup, Dumper=AnsibleDumperRepository, explicit_start=True, explicit_end=True, sort_keys=False, default_flow_style=False,default_style='', allow_unicode=True)
 
         with open(self.url_inventory_hosts(), 'w') as fileInventory:
             self.createConfigParser(self.inventory._inventory).write(fileInventory)
+        
+        self.repository.commitAndPush()
     
     def createConfigParser(self, data):
         result = configparser.ConfigParser(allow_no_value=True,delimiters=' ')
@@ -212,7 +231,7 @@ class PlaybookRepository():
             folder = self.repository.folderRepository()
 
         with open(folder+'/'+filename, 'w') as file:
-                documents = yaml.dump(data, file, Dumper=AnsibleDumper, explicit_start=True, explicit_end=True, sort_keys=False, default_flow_style=False, default_style='', allow_unicode=True)
+                documents = yaml.dump(data, file, Dumper=AnsibleDumperRepository, explicit_start=True, explicit_end=True, sort_keys=False, default_flow_style=False, default_style='', allow_unicode=True)
 
     def salvarDefaults(self, data):
         folder = data._role_path+'/defaults'
@@ -277,8 +296,10 @@ class PlaybookRepository():
                     data['roles'] = roles
 
                 dataPlaybook.append(data)
+        
 
             self.salvarYaml(dataPlaybook,filename=filename)
+        self.repository.commitAndPush()
             
             
 

@@ -3,6 +3,7 @@ services:
   autoticket:
     ports:
       - 8000:8000
+      - 3000:3000
     build:
       context: .
       dockerfile: Dockerfile
