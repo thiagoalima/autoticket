@@ -57,6 +57,8 @@ class Repository(models.Model):
 
         repo = Repo(self.folderRepository())
 
+        #TODO fazer pull
+
         repo.git.add('--all')
         repo.index.commit(commit_message)
 
@@ -69,8 +71,12 @@ class Repository(models.Model):
         if not isExist:
             os.makedirs(self.folderRepository())
             Repo.clone_from(self.urlGit(), self.folderRepository())
-            os.makedirs(self.folderRepository()+'/group_vars')
-            os.makedirs(self.folderRepository()+'/host_vars')
+
+            if not os.path.exists(self.folderRepository()+'/group_vars'):
+                os.makedirs(self.folderRepository()+'/group_vars')
+
+            if not os.path.exists(self.folderRepository()+'/host_vars'):   
+                os.makedirs(self.folderRepository()+'/host_vars')
             #criar um projeto em branco 
             cli = GalaxyCLI(args=["ansible-galaxy", "init", self.nome,"--init-path", self.folderRepository()+'/roles',"--force"])
             cli.run()
@@ -92,7 +98,7 @@ class Repository(models.Model):
         plays = []
 
         for playbookFile in os.listdir(self.folderRepository()): 
-            if playbookFile.endswith(".yml") or playbookFile.endswith(".yaml") :
+            if (playbookFile.endswith(".yml") or playbookFile.endswith(".yaml")) and 'gitlab-ci' not in playbookFile  :
                 plays.append(Playbook.load(self.folderRepository()+'/'+playbookFile, loader=loader))
 
         return PlaybookRepository(repository=self,playbooks=plays)

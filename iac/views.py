@@ -31,7 +31,7 @@ def getHtmlInventoryParameter(inventoryParameter,value=''):
                     for v in inventoryParameter.value.split(','):
                         selected = 'selected' if v == value else None
                         html += '<option value="{value}" {selected}>{value}</option> '.format(
-                            value=v, selected=selected)
+                            value=v.strip(), selected=selected)
                     html += '</select> '
     return html
 
@@ -68,7 +68,7 @@ def getHtmlAnsibleModuleVariable(AnsibleModuleVariables):
                if ansibleModuleVariable.choices:
                     html += f'<select class="form-select" name="param__{ansibleModuleVariable.name}" {required}> '
                     for v in ansibleModuleVariable.choices.split('|'):
-                        html += f'<option value="{v}">{v}</option> '
+                        html += f'<option value="{v.strip()}">{v.strip()}</option> '
                     html += '</select> '
                else:
                     html+=f'<input type="text" class="form-control" name="param__{ansibleModuleVariable.name}" {required}> '
