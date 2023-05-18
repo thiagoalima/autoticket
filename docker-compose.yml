@@ -18,7 +18,7 @@ services:
     hostname: autoticket-postgres
     ports:
       - 5432:5432
-    image: postgres:14-alpine
+    image: postgres:15
     env_file: docker/env/postgres.env
     volumes:
     - autoticket-postgres-data:/var/lib/postgresql/data

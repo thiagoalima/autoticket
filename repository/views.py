@@ -3,6 +3,7 @@ from users.utilities.view import TableView, CreateView, UpdateView, DeleteView, 
 from django.views import View
 from ansible.inventory.host import Host
 from ansible.playbook.task import Task
+from ansible.playbook.handler import Handler
 from .tables import RepositoryTable
 from django.http import HttpResponse
 from iac.views import getHtmlInventoryParameter
@@ -64,7 +65,32 @@ class PlaybookDetailView (DetailView):
         context = {'ansibleModules':ansibleModules,'playbookParameters': playbookParameters, 
                    'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
         return self.render_to_response(context)
-    
+
+class HandlerDetailView (DetailView):
+    model = Repository
+    template_name = "repository/playbook_form.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        playbookRepository = self.object.getPlaybookRepository()
+
+        playbookHost = request.GET['playbook']
+        filename = request.GET['filename']
+
+        handlers = []
+        jsonHandlers = []
+        for playbook in playbookRepository.playbooks:
+            if filename in playbook._file_name:
+                for play in playbook.get_plays():
+                    if playbookHost == play.get_name():
+                        handlers = getattr(play,'handlers')
+
+        for b in handlers:
+            for h in b.block:
+                jsonHandlers.append({'name':h.name,'action':h.action, h.action:h.args})
+
+        return JsonResponse(jsonHandlers, safe=False)    
+
 class TaskDetailView (DetailView):
     model = Repository
     template_name = "repository/playbook_form.html"
@@ -88,8 +114,8 @@ class TaskDetailView (DetailView):
                 jsonTask.append({'name':t.name,'action':t.action, t.action:t.args})
 
         return JsonResponse(jsonTask, safe=False)
-
-class AddTaskPlaybookView(CreateView):
+    
+class AddHandlerPlaybookView(CreateView):
     model = Repository
     template_name = "repository/playbook_form.html"
 
@@ -114,19 +140,97 @@ class AddTaskPlaybookView(CreateView):
                 if all_post_data[line]:
                     params_data[params_key]=all_post_data[line]
 
+        for playbook in playbookRepository.playbooks:
+            if filename in playbook._file_name:
+                for play in playbook.get_plays():
+                    if playbookHost == play.get_name():
+                        handler = Handler()
+                        setattr(handler,'name',name)
+                        setattr(handler,'action',ansibleModule.name)
+                        setattr(handler,'args',params_data)
+                        handlers = getattr(play,'handlers')
+                        handlers.append(handler)
+                        setattr(play,'handlers',handlers)
+    
+        playbookRepository.salvarPlaybooks();
+
+        context = {'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
+        return self.render_to_response(context)
+
+class TaskDeleteView(DeleteView):
+    model = Repository
+    template_name = "repository/playbook_form.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        playbookRepository = self.object.getPlaybookRepository()
+        inventoryParameters = InventoryParameter.objects.all()
+
+        playbookName = request.GET['playbook']
+        filename = request.GET['filename']
+        name = request.GET['name']
+        
+        for playbook in playbookRepository.playbooks:
+            if filename in playbook._file_name:
+                for play in playbook.get_plays():
+                    if playbookName == play.get_name():
+                        blocks = getattr(play,'tasks')
+                        remover = None;
+                        for block in blocks:
+                            for task in block.get_tasks():
+                                if name in task.name:
+                                    remover = block
+                        blocks.remove(remover)
+                        setattr(play,'tasks',blocks)
+    
+        playbookRepository.salvarPlaybooks();
+
+        context = {'inventoryParameters':inventoryParameters, 'playbookRepository':playbookRepository}
+        return self.render_to_response(context)
+       
+
+class AddTaskPlaybookView(CreateView):
+    model = Repository
+    template_name = "repository/playbook_form.html"
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        playbookRepository = self.object.getPlaybookRepository()
+        inventoryParameters = InventoryParameter.objects.all()
+        
+
+        playbookHost = request.POST['playbook']
+        filename = request.POST['filename']
+        name = request.POST['name']
+        idModule = request.POST['actionSelect']
+
+        notifications = []
+        if 'notify[]' in request.POST:
+            for notify in request.POST.getlist('notify[]'):
+                notifications.append(notify)
+
+        ansibleModule = AnsibleModule.objects.get(id=idModule)
+        
+        params_data = {}    
+        all_post_data = request.POST.dict()
+        for line in all_post_data:
+            if line.startswith('param__'):
+                params_key = line.replace('param__','')
+                if all_post_data[line]:
+                    params_data[params_key]=all_post_data[line]
+
         tasks = []
         for playbook in playbookRepository.playbooks:
             if filename in playbook._file_name:
                 for play in playbook.get_plays():
                     if playbookHost == play.get_name():
-                        #block = Block()
                         task = Task()
                         setattr(task,'name',name)
                         setattr(task,'action',ansibleModule.name)
                         setattr(task,'args',params_data)
+                        setattr(task,'notify',notifications)
                         tasks = getattr(play,'tasks')
                         tasks.append(task)
-                        #tasks.append({"name":name,ansibleModule.name: params_data})
                         setattr(play,'tasks',tasks)
     
         playbookRepository.salvarPlaybooks();

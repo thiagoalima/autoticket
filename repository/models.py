@@ -53,6 +53,8 @@ class Repository(models.Model):
     
     def commitAndPush(self):
         dataAtual= datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+
+        #TODO coloca o usuario que fez o commit
         commit_message = f'commit realizado em {dataAtual}'
 
         repo = Repo(self.folderRepository())

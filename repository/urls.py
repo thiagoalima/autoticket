@@ -26,6 +26,9 @@ urlpatterns = [
     path('playbook/play/host/add/<pk>',views.AddHostPlaybookView.as_view(), name='playbook_host_add'),
     path('playbook/play/vars/add/<pk>',views.AddVarsPlaybookView.as_view(), name='playbook_vars_add'),
     path('playbook/play/task/add/<pk>',views.AddTaskPlaybookView.as_view(), name='playbook_task_add'),
+    path('playbook/play/task/del/<pk>',views.TaskDeleteView.as_view(), name='playbook_task_del'),
+    path('playbook/play/handler/add/<pk>',views.AddHandlerPlaybookView.as_view(), name='playbook_handler_add'),
     path('playbook/play/tasks/<pk>',views.TaskDetailView.as_view(), name='playbook_task_detail'),
+    path('playbook/play/handlers/<pk>',views.HandlerDetailView.as_view(), name='playbook_handler_detail'),
 ]   
 

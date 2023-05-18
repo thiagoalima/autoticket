@@ -31,6 +31,8 @@ from ansible.vars.manager import VarsWithSources
 
 from ansible.playbook.block import Block
 from ansible.playbook.task import Task
+from ansible.playbook.handler import Handler
+
 
 
 class AnsibleDumperRepository(SafeDumper):
@@ -66,13 +68,28 @@ def represent_undefined(self, data):
 def represent_block(self, data):
     blocks = {'block':[]}
     for task in data.block:
-        vars = task.args
-        blocks['block'].append({'name':task.name,task.action:vars})
+        blocks['block'].append(task_to_dict(task))
     return self.represent_dict(blocks)
 
 def represent_task(self, data):
-    task = {'name':data.name,data.action:data.args}
+    task = task_to_dict(data)
     return self.represent_dict(task)
+
+def task_to_dict(data):
+    task = {}
+    if hasattr(data, 'name') and data.name:
+        task['name'] = data.name
+    if hasattr(data, 'action') and data.action:
+        task[data.action] = data.args
+    if hasattr(data, 'notify') and data.notify:
+        task['notify'] = data.notify
+
+    return task
+
+AnsibleDumperRepository.add_representer(
+    Handler,
+    represent_task,
+)
 
 AnsibleDumperRepository.add_representer(
     Block,

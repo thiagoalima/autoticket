@@ -124,15 +124,15 @@
                                 <span class="bi-journal-arrow-up"></span>
                                 Edit File
                               </button>
-                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookHost('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name, "}}')">
+                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookHost('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name,|"}}')">
                                 <span class="bi-window-plus"></span>
                                 add Hosts
                               </button>
-                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookVars('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name, "}}')">
+                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookVars('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name,|"}}')">
                                 <span class="bi-window-plus"></span>
                                 add Vars
                               </button>
-                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookTask('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name, "}}')">
+                              <button type="button" class="btn btn-success btn-sm" onclick="addPlaybookTask('{{playbookFile|get_item:"_file_name"|basename}}' , '{{playbookFile.get_plays|list_to_string_by_attr:"name,|"}}')">
                                 <span class="bi-window-plus"></span>
                                 add Task
                               </button>
@@ -147,6 +147,53 @@
 </div>
 
 <!-- Modal -->
+
+<!-- addHandlerModal -->
+<form id="formAddHandlerModal">
+  {% csrf_token %}
+<div class="modal fade" id="addHandlerModal" tabindex="-1" aria-labelledby="addHandlerModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" >Add Handler</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <div class="mb-3">     
+            <input type="hidden" id="filenamePlaybookHandler" name="filename">
+            <input type="hidden" id="playbookHandler" name="playbook">
+            <input type="hidden" id="idRepository" name="repository" value="{{playbookRepository.repository.id }}">
+
+              <label class="form-label">Name</label>
+              <input id="handlerName" type="text" name="name" class="form-control">
+              <label class="form-label">Action</label>
+              <select id="actionTaskPlaybook" name="actionSelect" class="form-select" aria-label="Select Action" onchange="changeAction(this,'varsHandleDiv')">
+                <option value="0">Select Module</option>
+                {% for module in ansibleModules %}
+                  <option value="{{module.id}}">{{module.name}}</option>
+                {% endfor%}
+              </select>
+
+              <div class="card m-2">
+                <div class="card-header">Options</div>
+                <div class="card-body">
+                  <div id="varsHandleDiv">
+                                  
+
+                  </div>
+                </div>
+              </div>
+
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addplaybookTaskModal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="salvarHandler('addplaybookTaskModal')"> Add Handler </button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
 
 <!-- addplaybookTaskModal -->
 <form method="post" id="formAddPlaybookTask" action="{% url 'repository:playbook_task_add' playbookRepository.repository.id %}">
@@ -176,7 +223,7 @@
                 {% endfor%}
               </select>
 
-              <div class="card">
+              <div class="card m-2">
                 <div class="card-header">Options</div>
                 <div class="card-body">
                   <div id="varsTaskPlaybookDiv">
@@ -184,18 +231,38 @@
 
                   </div>
                 </div>
-                <div class="card-footer">
-                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button class="btn btn-primary btn-sm" type="button" onclick="salvarTask()"><span class="bi-plus"></span> Add</button>
+              </div>
+                
+              <div class="m-2">
+                <label class="form-label">Notify</label> 
+                <button type="button" class="btn btn-success btn-sm" onclick="criarHandler('addplaybookTaskModal')"> <span class="bi-plus"> </span> New Handler</button>
+              </div>
+              <div class="input-group mb-2">
+                <select id="notifyTaskPlaybook" name="notifySelect" class="form-select" aria-label="Select Notify">
+                </select>
+                <button class="btn btn-outline-secondary" type="button" onclick="addNotify('notificationsTaskPlaybookDiv')"> <span class="bi-plus"> </span> </button>
+              </div>
+
+              <div class="card m-2">
+                <div class="card-header">Notifications</div>
+                <div class="card-body">
+                  <div id="notificationsTaskPlaybookDiv">
+                                  
+
                   </div>
                 </div>
+              </div>
 
-            </div>
+              <div class="bg-light m-2 p-2">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button class="btn btn-primary btn-sm" type="button" onclick="salvarTask('addplaybookTaskModal')"><span class="bi-plus"></span> Add Task</button>
+                </div>
+              </div>
 
 
-            <div class="card">
+            <div class="card m-2">
               <div class="card-header">
-                Actions
+                Tasks
               </div>
               <div class="card-body">
                 <div id="actionsPlaybookDiv" class="list-group">
@@ -510,6 +577,112 @@
 <script>
   $('#playbookGroupDiv').hide();
 
+  function removerTask(playbook, filename, name){
+    var base_url = window.location.origin;
+    var id = $('#idRepository').val();
+    //var csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]').val();
+    //var remover = 'csrfmiddlewaretoken='+csrfmiddlewaretoken+'&playbook='+playbook+'&filename='+filename+'&repository='+id+'&name='+name;
+    var remover = {'playbook':playbook,'filename':filename, 'name':name};
+
+    //var form = $('#formAddPlaybookTask').serialize();
+
+    $.ajax({
+      url: base_url+'/repository/playbook/play/task/del/'+id,
+      type: 'GET',
+      data: remover,
+      success: function(result) {
+        $.get(base_url+'/repository/playbook/play/tasks/'+id,remover,function(data){
+          content = ''
+          
+          data.forEach(function(t){
+            content += '<a href="#" class="list-group-item list-group-item-action" aria-current="true">'+
+                        '<div class="container">'+
+                          '<div class="row">'+
+                            '<div class="col-10">'+
+                              '<div class="d-flex w-100 justify-content-between">'+
+                                '<h5 class="mb-1">-name: '+t.name+'</h5>'+
+                              '</div>'+
+                              '<p class="mb-1"><p>'+t.action+':</p>';
+                              Object.keys(t[t.action]).forEach(function(key){
+                                content += key+': '+t[t.action][key]+'<br>\n';
+                              });
+                                content += ' </p>';
+                content += '</div>'+
+                            '<div class="col-2 align-self-center">'+
+                              '<button class="btn btn-outline-secondary right" type="button" onclick="removerTask(\''+playbook+'\',\''+filename+'\',\''+t.name+'\')"> <span class="bi-trash"></span> </button>'+
+                            '</div>'+
+                        '</div> '+
+                        '</div>'+
+                      '</a>';
+          });
+
+          $("#actionsPlaybookDiv").html(content);
+        });
+      }
+    });
+  }
+
+  function addNotify(div){
+    var notify = $('#notifyTaskPlaybook').val();
+    var idNotify = notify.toLowerCase().replace(' ','_')
+    var content = $("#"+div).html();
+       content += '<a href="#" id="notify_'+idNotify+'" class="list-group-item list-group-item-action" aria-current="true">'+
+                      '<div class="container">'+
+                        '<div class="row">'+
+                          '<div class="col-10">'+
+                            '<div class="d-flex w-100 justify-content-between">'+
+                              '<h5 class="mb-1">'+notify+'</h5>'+
+                              '<input type="hidden" name="notify[]" value="'+notify+'">'+
+                            '</div>'+
+                          '</div>'+
+                          '<div class="col-2 align-self-center">'+
+                            '<button class="btn btn-outline-secondary right" type="button" onclick="removeId(\'notify_'+idNotify+'\')"> <span class="bi-trash"></span> </button>'+
+                          '</div>'+
+                       '</div> '+
+                      '</div>'+
+                     '</a>';
+
+    $("#"+div).html(content);
+  }
+
+  function salvarHandler(parent){
+    var base_url = window.location.origin;
+    var id = $('#idRepository').val();
+    var playbook = $('#playbookHandler').val();
+    var filename = $('#filenamePlaybookHandler').val();
+    var dataHandler = {'playbook':playbook,'filename':filename}
+
+    var form = $('#formAddHandlerModal').serialize();
+
+    $.post(base_url+'/repository/playbook/play/handler/add/'+id, form,function( data ) {
+      $.get(base_url+'/repository/playbook/play/handlers/'+id,dataHandler,function(data){
+
+        $("#notifyTaskPlaybook")
+            .empty()
+            .append(new Option('Select Handle', 0));
+
+        data.forEach(function(h){
+          $("#notifyTaskPlaybook").append(new Option(h.name, h.name));
+        });  
+      })
+    })
+
+    $('#addHandlerModal').modal('hide');
+    $('#'+parent).modal('show');
+  }
+
+  function criarHandler(parent){
+    var id = $('#idRepository').val();
+    var playbook = $('#taskPlaybookId').val();
+    var filename = $('#filenamePlaybookTask').val();
+
+    $('#playbookHandler').val(playbook);
+    $('#filenamePlaybookHandler').val(filename);
+
+    $('#'+parent).modal('hide');
+    $('#addHandlerModal').modal('show');
+  }
+
   function salvarTask(){
     var base_url = window.location.origin;
     var id = $('#idRepository').val();
@@ -538,7 +711,7 @@
                               content += ' </p>';
                content += '</div>'+
                           '<div class="col-2 align-self-center">'+
-                            '<button class="btn btn-outline-secondary right" type="button" onclick="removerTask(\''+filename+'\''+t.name+')"> <span class="bi-trash"></span> </button>'+
+                            '<button class="btn btn-outline-secondary right" type="button" onclick="removerTask(\''+playbook+'\',\''+filename+'\',\''+t.name+'\')"> <span class="bi-trash"></span> </button>'+
                           '</div>'+
                        '</div> '+
                       '</div>'+
@@ -564,6 +737,13 @@
       var filename = $('#filenamePlaybookTask').val();
       var dataTask = {'playbook':playbook,'filename':filename}
 
+      $.get(base_url+'/repository/playbook/play/handlers/'+id,dataTask,function(data){
+        $("#notifyTaskPlaybook").append(new Option('Select Handle', 0));
+        data.forEach(function(h){
+          $("#notifyTaskPlaybook").append(new Option(h.name, h.name));
+        });        
+      })
+
       $.get(base_url+'/repository/playbook/play/tasks/'+id,dataTask,function(data){
         content = ''
         
@@ -582,7 +762,7 @@
                               content += ' </p>';
                content += '</div>'+
                           '<div class="col-2 align-self-center">'+
-                            '<button class="btn btn-outline-secondary right" type="button" onclick="removerTask(\''+filename+'\''+t.name+')"> <span class="bi-trash"></span> </button>'+
+                            '<button class="btn btn-outline-secondary right" type="button" onclick="removerTask(\''+playbook+'\',\''+filename+'\',\''+t.name+'\')"> <span class="bi-trash"></span> </button>'+
                           '</div>'+
                        '</div> '+
                       '</div>'+
@@ -619,21 +799,21 @@
   }
 
   function addPlaybookHost(filename, plays){
-
-    var playbooks = plays.split(' ');
+    
+    var playbooks = plays.split('|');
 
     $('#filenamePlaybook').val(filename);
 
     playbooks.forEach(function(nome, i) {
       $("#hostPlaybookId").append(new Option(nome, nome));
-    })
+    }) 
     
     $('#addplaybookHostsModal').modal('show');
   }
 
   function addPlaybookTask(filename, plays){
 
-    var playbooks = plays.split(' ');
+    var playbooks = plays.split('|');
 
     $('#filenamePlaybookTask').val(filename);
 
@@ -647,7 +827,7 @@
 
   function addPlaybookVars(filename, plays){
 
-    var playbooks = plays.split(' ');
+    var playbooks = plays.split('|');
 
     $('#filenamePlaybookVars').val(filename);
 
