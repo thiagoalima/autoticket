@@ -1,6 +1,10 @@
 # base image  
 FROM python:3.8   
 
+RUN apt-get update && \
+    apt-get install -y sshpass vim bash tcpdump iperf busybox \
+    net-tools iproute2 ethtool iputils-ping
+
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"

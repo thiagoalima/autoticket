@@ -454,7 +454,7 @@
 </form>
 
 <!-- addHostModal -->
-<form method="post" action="{% url 'repository:host_add' playbookRepository.repository.id %}">
+<form method="post" action="{% url 'repository:host_add' playbookRepository.repository.id %}" enctype="multipart/form-data">
     {% csrf_token %}
 <div class="modal fade" id="addHostModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">

@@ -1,22 +1,25 @@
+"""Model Repository"""
+import os
+import configparser
+import yaml
 from django.db import models
 from ansible.inventory.manager import InventoryManager
 from ansible.playbook import Playbook
 from ansible.playbook.play import Play
-#from ansible.parsing.yaml.dumper import AnsibleDumper
-from .dumper import AnsibleDumperRepository
-from ansible.parsing.dataloader import DataLoader
 from ansible.cli.galaxy import GalaxyCLI
 from ansible.vars.manager import VariableManager
 from ansible.vars.plugins import get_vars_from_path
-from ansible.plugins.vars.host_group_vars import VarsModule
+from ansible.parsing.dataloader import DataLoader
+from ansible.parsing.vault import VaultLib, VaultSecret,VaultEditor
+from .dumper import AnsibleDumperRepository
+from .constants import ATTRIBUTES_TASK, ATTRIBUTES_PLAYBOOK
 from django.conf import settings
 from git import Repo
-from .constants import ATTRIBUTES_TASK, ATTRIBUTES_PLAYBOOK
-import configparser
 from datetime import datetime
-import yaml
-import os
 
+from ansible import constants as C
+
+VAULT_SECRET = [(C.DEFAULT_VAULT_IDENTITY, VaultSecret(settings.VAULT_KEY.encode()))]
 
 # Class to handle Repository
 class Repository(models.Model):
@@ -79,6 +82,9 @@ class Repository(models.Model):
 
             if not os.path.exists(self.folderRepository()+'/host_vars'):   
                 os.makedirs(self.folderRepository()+'/host_vars')
+                
+            if not os.path.exists(self.folderRepository()+'/files'):   
+                os.makedirs(self.folderRepository()+'/files')
             #criar um projeto em branco 
             cli = GalaxyCLI(args=["ansible-galaxy", "init", self.nome,"--init-path", self.folderRepository()+'/roles',"--force"])
             cli.run()
@@ -113,6 +119,7 @@ class InventoryRepository():
         self.inventory = inventory
         self.host_vars = {}
         self.group_vars = {}
+        self.vault = VaultLib(VAULT_SECRET)
         if not inventory:
             self.load_inventory()
         if self.variable_manager:
@@ -120,6 +127,7 @@ class InventoryRepository():
 
     def load_inventory(self):
         self.loader = DataLoader()
+        self.loader.set_vault_secrets(VAULT_SECRET)
         self.loader.set_basedir(self.repository.folderRepository())
         self.inventory = InventoryManager(loader=self.loader,sources=[self.url_inventory_hosts()], parse=True)
         self.variable_manager = VariableManager(loader=self.loader, inventory=self.inventory)
@@ -167,6 +175,16 @@ class InventoryRepository():
     def getGroupVars(self,host):
         return self.group_vars[host]
     
+    def _encrypt_files(self):
+        vault_editor = VaultEditor(vault=self.vault)
+        for host,vars_host in self.host_vars.items():
+            if vars_host and os.path.exists(self.url_host_vars(host)):
+                vault_editor.encrypt_file(self.url_host_vars(host),None,C.DEFAULT_VAULT_IDENTITY)
+        for group,vars_group in self.group_vars.items():
+            if vars_group and os.path.exists(self.url_group_vars(group)):
+                vault_editor.encrypt_file(self.url_group_vars(group),None,C.DEFAULT_VAULT_IDENTITY)
+        vault_editor.encrypt_file(self.url_inventory_hosts(),None,C.DEFAULT_VAULT_IDENTITY)
+    
     def saveInventory(self):
         for host,vars in self.host_vars.items():
             if vars:
@@ -180,27 +198,33 @@ class InventoryRepository():
         with open(self.url_inventory_hosts(), 'w') as fileInventory:
             self.createConfigParser(self.inventory._inventory).write(fileInventory)
         
+        self._encrypt_files()
         self.repository.commitAndPush()
     
     def createConfigParser(self, data):
         result = configparser.ConfigParser(allow_no_value=True,delimiters=' ')
+        
         for host in data.groups['all'].hosts:
             vars = ''
-            result['all']={}
             for k,v in host.vars.items():
                 if k not in ['inventory_file', 'inventory_dir']:
                     vars += k + "=" + v+" "
-            result['all'].update({host.name:vars})
+            if 'all' in result:
+                result['all'].update({host.name:vars})
+            else:
+                result['all']={host.name:vars}
         
         for name, group in data.groups.items():
             if name not in ['ungrouped','all']:
                 vars = ''
-                result[name]={}
                 for host in group.hosts:
                     for k,v in host.vars.items():
                         if k not in ['inventory_file', 'inventory_dir']:
                             vars += k + "=" + v+" "
-                    result[name].update({host.name:vars})
+                    if name in result:
+                        result[name].update({host.name:vars})
+                    else:
+                        result[name]={host.name:vars}
 
         return result
     

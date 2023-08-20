@@ -16,6 +16,8 @@ from iac.models import InventoryParameter, PlaybookParameter, AnsibleModule, Ans
 from ansible.playbook.block import Block
 from django.http import JsonResponse
 
+from .helper import handle_uploaded_file
+
 """
     Classes refering to the Repo views
 """
@@ -448,6 +450,14 @@ class AddHostView(CreateView):
             if line.startswith('param__'):
                 params_key = line.replace('param__','')
                 params_data[params_key]=all_post_data[line]
+                
+        all_file_data = request.FILES.dict()
+        for line in all_file_data:
+            if line.startswith('param__'):
+                params_key = line.replace('param__','')
+                path_files = playbookRepository.inventoryRepository.repository.folderRepository()+'/files/'
+                handle_uploaded_file(all_file_data[line], path_files)
+                params_data[params_key]=path_files+all_file_data[line].name
 
         hostObject = playbookRepository.inventoryRepository.inventory.get_host(request.POST['host'])
 
