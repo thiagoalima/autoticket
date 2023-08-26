@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import os
 
 from pathlib import Path
 
 from os import environ
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,11 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-c-w0-joxoi*rb#h3aeltnt6nvld*fbx^8yf#x9c53k^95$muoi'
-
+VAULT_KEY = 'vault123'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+FOLDER_REPOSITORY = environ.get('Repository', '/home/thiagoabreu/Desenvolvimento/repository') 
 
 
 # Application definition
@@ -45,10 +49,13 @@ INSTALLED_APPS = [
     'bootstrap5',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_bootstrap_icons',
     'rest_framework',
     'autoticketapp',
     'drf_yasg',
     'users',
+    'repository',
+    'iac'
 ]
 
 # CRISPY FORM
@@ -84,6 +91,14 @@ TEMPLATES = [
     },
 ]
 
+# Static files (CSS, JavaScript, Images)
+STATIC_ROOT = f'{BASE_DIR}/static'
+STATIC_URL = f'/{BASE_DIR}/static/'
+
+STATICFILES_DIRS = [
+	os.path.join(STATIC_URL,'js')
+]
+
 # Set up authentication backends
 AUTHENTICATION_BACKENDS = [
     'users.authentication.ObjectPermissionBackend',
@@ -117,15 +132,14 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'autoticket',
-        'USER': 'autoticket',
-        'PASSWORD': '123456789',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': environ.get('DB_NAME', 'autoticket'),
+        'USER': environ.get('DB_USER', 'postgres'),
+        'PASSWORD': environ.get('DB_PASSWORD', 'postgres'),
+        'HOST': environ.get('DB_HOST', 'localhost'),
+        'PORT': environ.get('DB_PORT', '5432'),
     }
 }
 

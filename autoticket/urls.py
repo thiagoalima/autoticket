@@ -28,6 +28,8 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('autoticket/', include('autoticketapp.urls')),
     path('autoticket/users', include('users.urls')),
+    path('repository/', include('repository.urls')),
+    path('iac/', include('iac.urls')),
     path('admin/', admin.site.urls),
 
      # API

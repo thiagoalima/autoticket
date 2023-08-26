@@ -14,10 +14,13 @@ from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import View
 
 
-from .forms import ConfirmationForm, TokenForm
+from django.views.generic.edit import CreateView,UpdateView, DeleteView, FormView
 
 from .models import Token
 
+from .forms import TokenForm
+
+SUCCESS_URL ='/autoticket/usersapi-tokens/'
 
 #
 # Login/logout
@@ -139,80 +142,28 @@ class TokenListView(LoginRequiredMixin, View):
             'active_tab': 'api-tokens',
         })
 
+class TokenCreateView(LoginRequiredMixin, FormView):
+    form_class = TokenForm
+    success_url = SUCCESS_URL
+    template_name = "users/token_form.html"
 
-class TokenEditView(LoginRequiredMixin, View):
+    def form_valid(self, form):
+        token = form.save(commit=False)
+        token.user = self.request.user
+        token.save()
 
-    def get(self, request, pk=None):
+        msg = f"Token criado"
+        messages.success(self.request, msg)
 
-        if pk:
-            token = get_object_or_404(Token.objects.filter(user=request.user), pk=pk)
-        else:
-            token = Token(user=request.user)
+        return super().form_valid(form)
 
-        form = TokenForm(instance=token)
+class TokenUpdateView(LoginRequiredMixin, UpdateView):
+    model = Token
+    fields = ["key","write_enabled","expires","description"]
+    success_url = SUCCESS_URL
+    template_name = "users/token_form.html"
 
-        return render(request, 'generic/object_edit.html', {
-            'object': token,
-            'form': form,
-            'return_url': reverse('user:token_list'),
-        })
-
-    def post(self, request, pk=None):
-
-        if pk:
-            token = get_object_or_404(Token.objects.filter(user=request.user), pk=pk)
-            form = TokenForm(request.POST, instance=token)
-        else:
-            token = Token(user=request.user)
-            form = TokenForm(request.POST)
-
-        if form.is_valid():
-            token = form.save(commit=False)
-            token.user = request.user
-            token.save()
-
-            msg = f"Modified token {token}" if pk else f"Token criado {token}"
-            messages.success(request, msg)
-
-            if '_addanother' in request.POST:
-                return redirect(request.path)
-            else:
-                return redirect('user:token_list')
-
-        return render(request, 'generic/object_edit.html', {
-            'object': token,
-            'form': form,
-            'return_url': reverse('user:token_list'),
-        })
-
-
-class TokenDeleteView(LoginRequiredMixin, View):
-
-    def get(self, request, pk):
-
-        token = get_object_or_404(Token.objects.filter(user=request.user), pk=pk)
-        initial_data = {
-            'return_url': reverse('user:token_list'),
-        }
-        form = ConfirmationForm(initial=initial_data) 
-
-        return render(request, 'generic/object_delete.html', {
-            'object': token,
-            'form': form,
-            'return_url': reverse('user:token_list'),
-        })
-
-    def post(self, request, pk):
-
-        token = get_object_or_404(Token.objects.filter(user=request.user), pk=pk)
-        form = ConfirmationForm(request.POST)
-        if form.is_valid():
-            token.delete()
-            messages.success(request, "Token deletado")
-            return redirect('user:token_list')
-
-        return render(request, 'generic/object_delete.html', {
-            'object': token,
-            'form': form,
-            'return_url': reverse('user:token_list'),
-        })
+class TokenDeleteView(LoginRequiredMixin, DeleteView):
+    model = Token
+    success_url = SUCCESS_URL
+    template_name = "users/confirm_delete.html"
