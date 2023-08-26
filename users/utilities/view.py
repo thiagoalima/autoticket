@@ -1,9 +1,8 @@
+from users.permissions import get_permission_for_model
 from django.views.generic.edit import CreateView,UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django_tables2 import SingleTableView
-
-from ..permissions import get_permission_for_model
 
 DEFAULT_URL_SUCCESS = "/autoticket/ticket/"
 

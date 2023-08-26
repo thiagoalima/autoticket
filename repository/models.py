@@ -1,8 +1,10 @@
 """Model Repository"""
+import shutil
 import os
 import configparser
+from datetime import datetime
 import yaml
-from django.db import models
+from ansible import constants as C
 from ansible.inventory.manager import InventoryManager
 from ansible.playbook import Playbook
 from ansible.playbook.play import Play
@@ -10,20 +12,16 @@ from ansible.cli.galaxy import GalaxyCLI
 from ansible.vars.manager import VariableManager
 from ansible.vars.plugins import get_vars_from_path
 from ansible.parsing.dataloader import DataLoader
-from ansible.parsing.vault import VaultLib, VaultSecret,VaultEditor
+from ansible.parsing.vault import VaultLib, VaultEditor, ScriptVaultSecret
+from django.conf import settings
+from django.db import models
+from git import Repo
 from .dumper import AnsibleDumperRepository
 from .constants import ATTRIBUTES_TASK, ATTRIBUTES_PLAYBOOK
-from django.conf import settings
-from git import Repo
-from datetime import datetime
-
-from ansible import constants as C
-
-VAULT_SECRET = [(C.DEFAULT_VAULT_IDENTITY, VaultSecret(settings.VAULT_KEY.encode()))]
 
 # Class to handle Repository
 class Repository(models.Model):
-
+    """Class Repository Model"""
     def __init__(self, *args, **kwargs):
         self.playbookRepository = None
         super().__init__(*args, **kwargs)
@@ -71,9 +69,9 @@ class Repository(models.Model):
         origin.push()
     
     def save(self, *args, **kwargs):
-        isExist = os.path.exists(self.folderRepository())
+        is_exist = os.path.exists(self.folderRepository())
 
-        if not isExist:
+        if not is_exist:
             os.makedirs(self.folderRepository())
             Repo.clone_from(self.urlGit(), self.folderRepository())
 
@@ -85,11 +83,23 @@ class Repository(models.Model):
                 
             if not os.path.exists(self.folderRepository()+'/files'):   
                 os.makedirs(self.folderRepository()+'/files')
+            
+            #TODO: Tem que ter permissão 600 nessa pasta no gitrunner!
+            if not os.path.exists(self.folderRepository()+'/files/keys'):   
+                os.makedirs(self.folderRepository()+'/files/keys')
+            
+            source_gitlab = str(settings.BASE_DIR)+'/repository/pipeline/.gitlab-ci.yml'
+            shutil.copyfile(source_gitlab, self.folderRepository()+'/.gitlab-ci.yml')
+            source_script = str(settings.BASE_DIR)+'/repository/pipeline/script.sh'
+            shutil.copyfile(source_script, self.folderRepository()+'/script.sh')
+            vault_script = str(settings.BASE_DIR)+'/vault.py'
+            #TODO: Tem que ter permissão de execução no gitrunner!
+            shutil.copyfile(vault_script, self.folderRepository()+'/vault.py')
+            
             #criar um projeto em branco 
             cli = GalaxyCLI(args=["ansible-galaxy", "init", self.nome,"--init-path", self.folderRepository()+'/roles',"--force"])
             cli.run()
             
-        
         #bloco de teste
         self.playbookRepository = self.getPlaybookRepository()
 
@@ -112,6 +122,7 @@ class Repository(models.Model):
         return PlaybookRepository(repository=self,playbooks=plays)
 
 class InventoryRepository():
+    """Class InventoryRepository Model"""
 
     def __init__(self, repository:Repository, loader:DataLoader=None, inventory:InventoryManager=None) -> None:
         self.loader = loader
@@ -119,7 +130,10 @@ class InventoryRepository():
         self.inventory = inventory
         self.host_vars = {}
         self.group_vars = {}
-        self.vault = VaultLib(VAULT_SECRET)
+        secret_script = ScriptVaultSecret(filename=self.repository.folderRepository()+'/vault.py',loader=DataLoader())
+        secret_script.load()
+        self.vault_secret = [(C.DEFAULT_VAULT_IDENTITY,secret_script)]
+        self.vault = VaultLib(self.vault_secret)
         if not inventory:
             self.load_inventory()
         if self.variable_manager:
@@ -127,10 +141,13 @@ class InventoryRepository():
 
     def load_inventory(self):
         self.loader = DataLoader()
-        self.loader.set_vault_secrets(VAULT_SECRET)
+        self.loader.set_vault_secrets(self.vault_secret)
         self.loader.set_basedir(self.repository.folderRepository())
         self.inventory = InventoryManager(loader=self.loader,sources=[self.url_inventory_hosts()], parse=True)
         self.variable_manager = VariableManager(loader=self.loader, inventory=self.inventory)
+        
+    def get_inventory(self):
+        return self.inventory._inventory
     
     def url_host_vars(self,host):
         return self.repository.folderRepository()+'/host_vars/'+host
@@ -217,6 +234,12 @@ class InventoryRepository():
         for name, group in data.groups.items():
             if name not in ['ungrouped','all']:
                 vars = ''
+                if not group.hosts:
+                    if name in result:
+                        result[name].update({})
+                    else:
+                        result[name]={}
+                        
                 for host in group.hosts:
                     for k,v in host.vars.items():
                         if k not in ['inventory_file', 'inventory_dir']:
