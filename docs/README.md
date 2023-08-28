@@ -36,8 +36,30 @@ Adicione as variaveis de ambiente com as credenciais do banco de dados postgres,
 ```bash
 
 echo 'export DB_NAME=xxx DB_USER=postgres DB_PASSWORD=postgres DB_HOST=localhost DB_PORT=5432' >> ~/.bashrc && source ~/.bashrc
+```
+
+Crie o banco e o usuario no Postgresql. Execute os seguintes comandos:
+
+Para entrar no console do Postgres:
+
+```bash
+
+sudo -u postgres psql
 
 ```
+Criando o banco:
+```bash
+CREATE DATABASE xxx;
+```
+Criando o usuario:
+```bash
+CREATE USER xxx WITH PASSWORD '123456789';
+```
+Mudando o dono do banco:
+```bash
+ALTER DATABASE xxx OWNER TO xxx;
+```
+
 Para criar o banco e suas tabelas execute o seguinte comando:
 
 ```bash
